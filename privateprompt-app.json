@@ -1,0 +1,26 @@
+{
+  "name": "Proposal Engine",
+  "slug": "proposal-engine",
+  "description": "Commercial proposal generator with real-time preview and PDF export for CreditCheck.",
+  "badge": "Internal",
+  "icon": {
+    "letter": "P",
+    "bg": "bg-blue-500/20",
+    "color": "text-blue-400"
+  },
+  "open_btn_class": "bg-blue-500/20 hover:bg-blue-500/30 text-blue-400",
+
+  "services": {
+    "web": {
+      "image": "gitea.apps.privateprompt.tech/rasmus/david-propsal-engine:latest",
+      "port": 3000,
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "memory_mb": 256
+    }
+  },
+  "entrypoint": "web",
+  "memory_mb": 256,
+  "cpu": 0.5
+}
