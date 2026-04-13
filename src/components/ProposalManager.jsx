@@ -89,7 +89,14 @@ export function ProposalManager({ st, dispatch, showToast }) {
               const date = p._savedAt
                 ? new Date(p._savedAt).toLocaleDateString(isEs ? 'es' : 'en')
                 : '';
-              const type = p.proposalType === 'leads' ? 'Leads' : 'WL';
+              const type =
+                p.proposalType === 'leads'
+                  ? 'Leads'
+                  : p.proposalType === 'combo'
+                    ? isEs
+                      ? 'Combinado'
+                      : 'Combo'
+                    : 'WL';
               return (
                 <div
                   key={name}

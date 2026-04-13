@@ -10,7 +10,7 @@ export function ContentTab({ st, dispatch }) {
         <input
           type="text"
           value={st.coverBadge}
-          placeholder="PARTNERSHIP PROPOSAL"
+          placeholder={isEs ? 'PROPUESTA DE COLABORACION' : 'PARTNERSHIP PROPOSAL'}
           onChange={(e) => dispatch({ t: 'SET', k: 'coverBadge', v: e.target.value })}
         />
       </div>

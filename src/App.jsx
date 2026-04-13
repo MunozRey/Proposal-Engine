@@ -213,9 +213,13 @@ function App() {
       if (p.id === 'cover') return { id: p.id, label: p.baseLabel, html: p.gen() }; // baseLabel is already English
       idx++;
       const num = String(idx).padStart(2, '0');
-      return { id: p.id, label: `Pg. ${idx + 1} — ${p.baseLabel}`, html: p.gen(num) };
+      return {
+        id: p.id,
+        label: `${lang === 'es' ? 'Pag.' : 'Pg.'} ${idx + 1} — ${p.baseLabel}`,
+        html: p.gen(num),
+      };
     });
-  }, [allPageDefs]);
+  }, [allPageDefs, lang]);
 
   // Visible pages with RENUMBERED content
   const visiblePages = useMemo(() => {
@@ -226,7 +230,11 @@ function App() {
       if (p.id === 'cover') return { id: p.id, label: t(lang, 'pageTitles.cover'), html: p.gen() };
       contentIdx++;
       const num = String(contentIdx).padStart(2, '0');
-      return { id: p.id, label: `Pg. ${contentIdx + 1} — ${p.baseLabel}`, html: p.gen(num) };
+      return {
+        id: p.id,
+        label: `${lang === 'es' ? 'Pag.' : 'Pg.'} ${contentIdx + 1} — ${p.baseLabel}`,
+        html: p.gen(num),
+      };
     });
   }, [allPageDefs, st.hiddenPages, lang]);
 
@@ -316,7 +324,10 @@ function App() {
           </span>
           <select
             value={lang}
-            onChange={(e) => dispatch({ t: 'SET', k: 'language', v: e.target.value })}
+            onChange={(e) => {
+              const nextLang = e.target.value;
+              dispatch({ t: 'LOCALIZE_TEMPLATE', v: nextLang });
+            }}
             style={{ flex: 1 }}
           >
             <option value="en">{t(lang, 'langEnglish')}</option>

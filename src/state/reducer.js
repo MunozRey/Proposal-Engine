@@ -1,4 +1,5 @@
 import { INIT } from './initialState.js';
+import { getTemplateDefaults } from './templateDefaults.js';
 
 /**
  * Actions use shorthand keys for compactness:
@@ -27,10 +28,13 @@ export function reducer(s, a) {
       return { ...s, [a.k]: a.v };
 
     case 'RESET':
-      return { ...INIT };
+      return { ...INIT, ...getTemplateDefaults(s.language || 'en'), language: s.language || 'en' };
 
     case 'LOAD':
       return { ...INIT, ...a.v };
+
+    case 'LOCALIZE_TEMPLATE':
+      return { ...s, ...getTemplateDefaults(a.v), language: a.v };
 
     // ── Page visibility ─────────────────────────────────────────
     case 'TOGGLE_PAGE': {
