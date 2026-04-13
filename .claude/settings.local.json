@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where python3:*)",
+      "Bash(where node:*)",
+      "Bash(where npx:*)",
+      "Bash(npx --version)",
+      "Bash(where vercel:*)",
+      "Bash(vercel --version)",
+      "Bash(vercel --yes --prod)",
+      "Bash(vercel --yes --prod --name creditcheck-propuestas)",
+      "WebFetch(domain:creditchecker.io)",
+      "Bash(npm create:*)",
+      "Bash(mv index.html index-legacy.html)",
+      "Bash(mv generador-propuestas-react.html generador-legacy.html)",
+      "Bash(cp temp-vite/package.json .)",
+      "Bash(cp temp-vite/vite.config.js .)",
+      "Bash(cp temp-vite/eslint.config.js .)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npx vercel:*)"
+    ]
+  }
+}
