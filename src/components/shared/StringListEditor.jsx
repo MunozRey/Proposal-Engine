@@ -7,12 +7,19 @@ export function StringListEditor({ items, onEdit, onAdd, onDel, addLabel = '+ Ad
     <>
       {items.map((item, i) => (
         <div key={i} className="feat-item">
-          <textarea rows={1} value={item} onChange={e => onEdit(i, e.target.value)} />
-          <button className="btn-remove" style={{ position: 'static', marginTop: '4px' }}
-            onClick={() => onDel(i)}>✕</button>
+          <textarea rows={1} value={item} onChange={(e) => onEdit(i, e.target.value)} />
+          <button
+            className="btn-remove"
+            style={{ position: 'static', marginTop: '4px' }}
+            onClick={() => onDel(i)}
+          >
+            ✕
+          </button>
         </div>
       ))}
-      <button className="btn-add" onClick={onAdd}>{addLabel}</button>
+      <button className="btn-add" onClick={onAdd}>
+        {addLabel}
+      </button>
     </>
   );
 }

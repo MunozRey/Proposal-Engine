@@ -35,19 +35,25 @@ export function reducer(s, a) {
     // ── Page visibility ─────────────────────────────────────────
     case 'TOGGLE_PAGE': {
       const set = new Set(s.hiddenPages);
-      if (set.has(a.k)) set.delete(a.k); else set.add(a.k);
+      if (set.has(a.k)) set.delete(a.k);
+      else set.add(a.k);
       return { ...s, hiddenPages: [...set] };
     }
 
     // ── White-Label ─────────────────────────────────────────────
     case 'STEP':
-      return { ...s, steps: s.steps.map((x, i) => i === a.i ? { ...x, [a.f]: a.v } : x) };
+      return { ...s, steps: s.steps.map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)) };
     case 'STEP_ADD': {
       const num = String(s.steps.length + 1).padStart(2, '0');
       return { ...s, steps: [...s.steps, { num, title: 'New step', desc: 'Step description.' }] };
     }
     case 'STEP_DEL':
-      return { ...s, steps: s.steps.filter((_, i) => i !== a.i).map((x, i) => ({ ...x, num: String(i + 1).padStart(2, '0') })) };
+      return {
+        ...s,
+        steps: s.steps
+          .filter((_, i) => i !== a.i)
+          .map((x, i) => ({ ...x, num: String(i + 1).padStart(2, '0') })),
+      };
     case 'FEAT': {
       const arr = [...s[a.side]];
       arr[a.i] = a.v;
@@ -58,7 +64,7 @@ export function reducer(s, a) {
     case 'FEAT_DEL':
       return { ...s, [a.side]: s[a.side].filter((_, i) => i !== a.i) };
     case 'PLAN':
-      return { ...s, plans: s.plans.map((x, i) => i === a.i ? { ...x, [a.f]: a.v } : x) };
+      return { ...s, plans: s.plans.map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)) };
 
     // ── Leads — simple fields ───────────────────────────────────
     case 'LEADS_SET':
@@ -66,7 +72,13 @@ export function reducer(s, a) {
 
     // ── Leads — object arrays (cplLeads, cpaTramos) ─────────────
     case 'LEADS_ARR_EDIT':
-      return { ...s, leads: { ...s.leads, [a.arr]: s.leads[a.arr].map((x, i) => i === a.i ? { ...x, [a.f]: a.v } : x) } };
+      return {
+        ...s,
+        leads: {
+          ...s.leads,
+          [a.arr]: s.leads[a.arr].map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)),
+        },
+      };
     case 'LEADS_ARR_ADD':
       return { ...s, leads: { ...s.leads, [a.arr]: [...s.leads[a.arr], a.item] } };
     case 'LEADS_ARR_DEL':

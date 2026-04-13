@@ -1,5 +1,5 @@
 /**
- * @typedef {'wl'|'leads'} ProposalType
+ * @typedef {'wl'|'leads'|'combo'} ProposalType
  *
  * @typedef {Object} Step
  * @property {string} num   - e.g. '01'
@@ -60,6 +60,7 @@
  *
  * @typedef {Object} AppState
  * @property {ProposalType} proposalType
+ * @property {'en'|'es'} language
  * @property {string} clientName
  * @property {string} clientLogoUrl
  * @property {string} ccLogoUrl
@@ -89,13 +90,14 @@ const autoDate = (() => {
 
 export const INIT = {
   proposalType: 'wl', // 'wl' | 'leads'
+  language: 'en',
 
   // ── Shared ────────────────────────────────────────────────────
-  clientName: 'Ebury',
+  clientName: '',
   clientLogoUrl: '',
   ccLogoUrl: '',
   date: autoDate,
-  productTitle: 'credit scoring',
+  productTitle: '',
   coverBadge: 'PARTNERSHIP PROPOSAL',
   coverLine1: '',
   coverLine3: '',
@@ -105,8 +107,8 @@ export const INIT = {
   brandBlue: '',
 
   // ── Footer / Header (editables) ─────────────────────────────
-  footerLeft: 'CreditCheck · Clovr Labs S.L. · Confidential',
-  footerRight: 'creditchecker.io',
+  footerLeft: 'Your Company · Confidential',
+  footerRight: 'your-domain.com',
 
   // ── Page visibility (set of page labels to HIDE) ─────────────
   hiddenPages: [],
@@ -115,9 +117,21 @@ export const INIT = {
   introText: '',
   setupFee: 'EUR 1.000',
   steps: [
-    { num: '01', title: 'IBAN and applicant data received', desc: 'Send the IBAN and applicant details within your existing flow. The visual experience remains unchanged for the end user.' },
-    { num: '02', title: 'Open Banking connection for income and solvency verification', desc: 'CreditCheck sends the account holder a secure link to complete the SCA flow. The screen shows only your brand identity.' },
-    { num: '03', title: 'Real-time credit eligibility result', desc: 'The system returns: Eligible / Not eligible / Manual review, net income, effort ratio and risk profile.' },
+    {
+      num: '01',
+      title: 'IBAN and applicant data received',
+      desc: 'Send the IBAN and applicant details within your existing flow. The visual experience remains unchanged for the end user.',
+    },
+    {
+      num: '02',
+      title: 'Open Banking connection for income and solvency verification',
+      desc: 'CreditCheck sends the account holder a secure link to complete the SCA flow. The screen shows only your brand identity.',
+    },
+    {
+      num: '03',
+      title: 'Real-time credit eligibility result',
+      desc: 'The system returns: Eligible / Not eligible / Manual review, net income, effort ratio and risk profile.',
+    },
   ],
   featuresL: [
     'Eligibility result with confidence level',
@@ -130,21 +144,63 @@ export const INIT = {
     'Documented REST API + white-label widget',
   ],
   plans: [
-    { name: 'Starter',    price: '€49',      per: '/mes', verifs: '50',   avg: '€0,98',    extra: '€1,20',     rec: false },
-    { name: 'Growth',     price: '€99',      per: '/mes', verifs: '120',  avg: '€0,825',   extra: '€1,00',     rec: true  },
-    { name: 'Enterprise', price: '€199',     per: '/mes', verifs: '300',  avg: '€0,663',   extra: '€0,85',     rec: false },
-    { name: 'Custom',     price: 'Custom',   per: '',     verifs: '300+', avg: 'Vol-based', extra: 'Vol-based', rec: false },
+    {
+      name: 'Starter',
+      price: '€49',
+      per: '/mes',
+      verifs: '50',
+      avg: '€0,98',
+      extra: '€1,20',
+      rec: false,
+    },
+    {
+      name: 'Growth',
+      price: '€99',
+      per: '/mes',
+      verifs: '120',
+      avg: '€0,825',
+      extra: '€1,00',
+      rec: true,
+    },
+    {
+      name: 'Enterprise',
+      price: '€199',
+      per: '/mes',
+      verifs: '300',
+      avg: '€0,663',
+      extra: '€0,85',
+      rec: false,
+    },
+    {
+      name: 'Custom',
+      price: 'Custom',
+      per: '',
+      verifs: '300+',
+      avg: 'Vol-based',
+      extra: 'Vol-based',
+      rec: false,
+    },
   ],
 
   // ── Leads ─────────────────────────────────────────────────────
   leads: {
-    overviewIntro: 'CreditCheck captures and delivers verified leads via Open Banking. We propose three collaboration models adapted to your commercial strategy and shared risk level.',
+    overviewIntro:
+      'CreditCheck captures and delivers verified leads via Open Banking. We propose three collaboration models adapted to your commercial strategy and shared risk level.',
 
     // CPL
-    cplIntro: 'Fixed fee per lead delivered with completed Open Banking. Predictable pricing with no conversion risk for the client.',
+    cplIntro:
+      'Fixed fee per lead delivered with completed Open Banking. Predictable pricing with no conversion risk for the client.',
     cplLeads: [
-      { type: 'Qualified Lead', price: '€12', desc: 'Open Banking completed · income and solvency verified · basic risk profile' },
-      { type: 'Premium Lead',   price: '€20', desc: 'Full credit scoring · effort ratio · detailed risk profile' },
+      {
+        type: 'Qualified Lead',
+        price: '€12',
+        desc: 'Open Banking completed · income and solvency verified · basic risk profile',
+      },
+      {
+        type: 'Premium Lead',
+        price: '€20',
+        desc: 'Full credit scoring · effort ratio · detailed risk profile',
+      },
     ],
     cplFeatures: [
       'Lead delivered only if OB flow is completed',
@@ -153,7 +209,8 @@ export const INIT = {
       'Name, IBAN and contact details validated',
     ],
     cplCalcTitle: 'Monthly calculation example',
-    cplCalcText: '50 Qualified Leads × €12 = €600\n20 Premium Leads × €20 = €400\nTotal estimated: €1,000/month',
+    cplCalcText:
+      '50 Qualified Leads × €12 = €600\n20 Premium Leads × €20 = €400\nTotal estimated: €1,000/month',
     cplNotes: [
       'Lead delivered only if the Open Banking flow is completed successfully.',
       'Monthly billing for leads actually delivered.',
@@ -161,12 +218,13 @@ export const INIT = {
     ],
 
     // CPA
-    cpaIntro: 'No cost until formalization. Fixed tiered fee based on loan amount plus commission on the approved amount.',
+    cpaIntro:
+      'No cost until formalization. Fixed tiered fee based on loan amount plus commission on the approved amount.',
     cpaTramos: [
-      { importe: 'Up to €5,000',        fee: '€30'  },
-      { importe: '€5,001 – €15,000',    fee: '€60'  },
-      { importe: '€15,001 – €30,000',   fee: '€100' },
-      { importe: 'Over €30,000',        fee: '€150' },
+      { importe: 'Up to €5,000', fee: '€30' },
+      { importe: '€5,001 – €15,000', fee: '€60' },
+      { importe: '€15,001 – €30,000', fee: '€100' },
+      { importe: 'Over €30,000', fee: '€150' },
     ],
     cpaCommission: '1.5%',
     cpaCommissionBase: 'approved amount',
@@ -177,7 +235,8 @@ export const INIT = {
       'Maximum efficiency in acquisition cost',
     ],
     cpaCalcTitle: 'Calculation example',
-    cpaCalcText: 'Loan €10,000 approved:\nFixed tier fee: €60\nCommission 1.5% × €10,000 = €150\nTotal per deal: €210',
+    cpaCalcText:
+      'Loan €10,000 approved:\nFixed tier fee: €60\nCommission 1.5% × €10,000 = €150\nTotal per deal: €210',
     cpaNotes: [
       'Fee due at the time of loan formalization.',
       'Commission calculated on the net formalized amount.',
@@ -185,7 +244,8 @@ export const INIT = {
     ],
 
     // Hybrid
-    hybridIntro: 'Reduced base CPL plus CPA bonus upon formalization. Covers acquisition costs and rewards real conversion. Ideal model for high volume with a good conversion rate.',
+    hybridIntro:
+      'Reduced base CPL plus CPA bonus upon formalization. Covers acquisition costs and rewards real conversion. Ideal model for high volume with a good conversion rate.',
     hybridCPLPrice: '€8',
     hybridCPAFee: '€50',
     hybridCPAComm: '0.5%',
@@ -196,7 +256,8 @@ export const INIT = {
       'Ideal for partners with a high conversion rate',
     ],
     hybridCalcTitle: 'Calculation example',
-    hybridCalcText: 'Lead captured: €8 (base CPL)\nLoan €10,000 formalized:\n  Fixed CPA bonus: €50\n  Commission 0.5% × €10,000 = €50\nTotal per converted lead: €158',
+    hybridCalcText:
+      'Lead captured: €8 (base CPL)\nLoan €10,000 formalized:\n  Fixed CPA bonus: €50\n  Commission 0.5% × €10,000 = €50\nTotal per converted lead: €158',
     hybridNotes: [
       'Base CPL is billed at the time of delivery of the verified lead.',
       'CPA bonus is billed upon deal formalization.',
@@ -206,12 +267,12 @@ export const INIT = {
 
   // ── Typography (sizes in px) ─────────────────────────────────
   typo: {
-    heading:   18,
-    subhead:   14,
-    body:      12,
-    small:     10,
+    heading: 18,
+    subhead: 14,
+    body: 12,
+    small: 10,
     tableBody: 10,
-    note:       8,
-    micro:      7,
+    note: 8,
+    micro: 7,
   },
 };

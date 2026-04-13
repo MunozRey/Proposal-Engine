@@ -13,14 +13,14 @@ export const BORDER = '#C8D8E8';
 export const BORDER_DARK = '#DDE6EF';
 
 // Text
-export const TC = '#1A2B3C';           // body text
-export const TEXT_MID = '#718096';      // secondary / muted
-export const TEXT_DARK = '#4A5568';     // notes, footnotes
+export const TC = '#1A2B3C'; // body text
+export const TEXT_MID = '#718096'; // secondary / muted
+export const TEXT_DARK = '#4A5568'; // notes, footnotes
 
 // Accent
-export const BLUE_LIGHT = '#90B8FF';   // light blue for features RHS
-export const NAVY_MID = '#1A3A6B';     // card accents
-export const NAVY_DEEP = '#2A4D8F';    // card accents
+export const BLUE_LIGHT = '#90B8FF'; // light blue for features RHS
+export const NAVY_MID = '#1A3A6B'; // card accents
+export const NAVY_DEEP = '#2A4D8F'; // card accents
 
 // Assets
 export const CC_LOGO = '/Logo-white.svg';

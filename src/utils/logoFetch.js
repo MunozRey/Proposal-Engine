@@ -1,6 +1,20 @@
-export function fetchLogoFromDomain(domain, target, dispatch, setStatus, setLoading) {
-  const clean = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim();
-  if (!clean) { setStatus({ msg: 'Enter a domain', ok: false }); return () => {}; }
+export function fetchLogoFromDomain(
+  domain,
+  target,
+  dispatch,
+  setStatus,
+  setLoading,
+  language = 'en'
+) {
+  const isEs = language === 'es';
+  const clean = domain
+    .replace(/^https?:\/\//, '')
+    .replace(/\/.*$/, '')
+    .trim();
+  if (!clean) {
+    setStatus({ msg: isEs ? 'Introduce un dominio' : 'Enter a domain', ok: false });
+    return () => {};
+  }
   setLoading(true);
   setStatus(null);
 
@@ -17,7 +31,12 @@ export function fetchLogoFromDomain(domain, target, dispatch, setStatus, setLoad
     if (idx >= sources.length) {
       if (!cancelled) {
         setLoading(false);
-        setStatus({ msg: 'Logo not found. Please upload it manually.', ok: false });
+        setStatus({
+          msg: isEs
+            ? 'Logo no encontrado. Subelo manualmente.'
+            : 'Logo not found. Please upload it manually.',
+          ok: false,
+        });
       }
       return;
     }
@@ -34,10 +53,13 @@ export function fetchLogoFromDomain(domain, target, dispatch, setStatus, setLoad
         c.height = imgCors.naturalHeight;
         c.getContext('2d').drawImage(imgCors, 0, 0);
         dispatch({ t: 'SET', k: target, v: c.toDataURL('image/png') });
-        setStatus({ msg: 'Logo loaded', ok: true });
+        setStatus({ msg: isEs ? 'Logo cargado' : 'Logo loaded', ok: true });
       } catch {
         dispatch({ t: 'SET', k: target, v: url });
-        setStatus({ msg: 'Logo loaded (external URL)', ok: true });
+        setStatus({
+          msg: isEs ? 'Logo cargado (URL externa)' : 'Logo loaded (external URL)',
+          ok: true,
+        });
       }
       setLoading(false);
     };
@@ -48,7 +70,10 @@ export function fetchLogoFromDomain(domain, target, dispatch, setStatus, setLoad
       imgNoCors.onload = () => {
         if (cancelled) return;
         dispatch({ t: 'SET', k: target, v: url });
-        setStatus({ msg: 'Logo loaded (external URL)', ok: true });
+        setStatus({
+          msg: isEs ? 'Logo cargado (URL externa)' : 'Logo loaded (external URL)',
+          ok: true,
+        });
         setLoading(false);
       };
       imgNoCors.onerror = () => trySource(idx + 1);
@@ -57,5 +82,7 @@ export function fetchLogoFromDomain(domain, target, dispatch, setStatus, setLoad
     imgCors.src = url;
   }
   trySource(0);
-  return () => { cancelled = true; };
+  return () => {
+    cancelled = true;
+  };
 }

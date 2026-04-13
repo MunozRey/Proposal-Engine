@@ -14,19 +14,22 @@ async function toDataUrl(url) {
 /** Replace every external <img> src with a data URL so html2canvas can draw them */
 async function inlineImages(container) {
   const imgs = [...container.querySelectorAll('img')];
-  await Promise.all(imgs.map(async (img) => {
-    img.removeAttribute('crossorigin');
-    const src = img.src;
-    if (!src || src.startsWith('data:')) return;
-    try {
-      img.src = await toDataUrl(src);
-    } catch {
-      img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    }
-  }));
+  await Promise.all(
+    imgs.map(async (img) => {
+      img.removeAttribute('crossorigin');
+      const src = img.src;
+      if (!src || src.startsWith('data:')) return;
+      try {
+        img.src = await toDataUrl(src);
+      } catch {
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      }
+    })
+  );
 }
 
-export async function exportPDF(pages, clientName) {
+export async function exportPDF(pages, clientName, language = 'en') {
+  const isEs = language === 'es';
   const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
     import('jspdf'),
     import('html2canvas'),
@@ -45,7 +48,7 @@ export async function exportPDF(pages, clientName) {
   `;
   overlay.innerHTML = `
     <div style="font-size:28px">📄</div>
-    <div id="pdf-status">Preparing…</div>
+    <div id="pdf-status">${isEs ? 'Preparando…' : 'Preparing…'}</div>
     <div style="width:220px;height:6px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden">
       <div id="pdf-bar" style="width:0%;height:100%;background:#1858F5;border-radius:3px;transition:width .3s ease"></div>
     </div>
@@ -70,7 +73,9 @@ export async function exportPDF(pages, clientName) {
   try {
     for (let i = 0; i < total; i++) {
       const pct = Math.round(((i + 0.5) / total) * 100);
-      statusEl.textContent = `Rendering page ${i + 1} of ${total}…`;
+      statusEl.textContent = isEs
+        ? `Renderizando pagina ${i + 1} de ${total}…`
+        : `Rendering page ${i + 1} of ${total}…`;
       barEl.style.width = pct + '%';
       countEl.textContent = `${i + 1} / ${total}`;
 
@@ -89,7 +94,10 @@ export async function exportPDF(pages, clientName) {
         height: 842,
         windowWidth: 595,
         windowHeight: 842,
-        x: 0, y: 0, scrollX: 0, scrollY: 0,
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
         logging: false,
         backgroundColor: null,
       });
@@ -102,7 +110,7 @@ export async function exportPDF(pages, clientName) {
     }
 
     barEl.style.width = '100%';
-    statusEl.textContent = 'Saving file…';
+    statusEl.textContent = isEs ? 'Guardando archivo…' : 'Saving file…';
 
     // Filename with date: CreditCheck_Ebury_2026-03.pdf
     const safeName = (clientName || 'Proposal').replace(/[^a-zA-Z0-9À-ÿ _-]/g, '').trim();

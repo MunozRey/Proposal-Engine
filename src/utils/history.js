@@ -12,30 +12,33 @@ export function useUndoReducer(reducerFn, initialState, batchMs = 600) {
   });
   const lastPush = useRef(0);
 
-  const dispatch = useCallback((action) => {
-    setState(prev => {
-      const newPresent = reducerFn(prev.present, action);
-      if (newPresent === prev.present) return prev;
+  const dispatch = useCallback(
+    (action) => {
+      setState((prev) => {
+        const newPresent = reducerFn(prev.present, action);
+        if (newPresent === prev.present) return prev;
 
-      const now = Date.now();
-      const shouldBatch = (now - lastPush.current) < batchMs && prev.past.length > 0;
+        const now = Date.now();
+        const shouldBatch = now - lastPush.current < batchMs && prev.past.length > 0;
 
-      if (shouldBatch) {
-        // Replace the last undo snapshot instead of creating new one
-        return { ...prev, present: newPresent, future: [] };
-      }
+        if (shouldBatch) {
+          // Replace the last undo snapshot instead of creating new one
+          return { ...prev, present: newPresent, future: [] };
+        }
 
-      lastPush.current = now;
-      return {
-        past: [...prev.past.slice(-39), prev.present], // max 40 entries
-        present: newPresent,
-        future: [],
-      };
-    });
-  }, [reducerFn, batchMs]);
+        lastPush.current = now;
+        return {
+          past: [...prev.past.slice(-39), prev.present], // max 40 entries
+          present: newPresent,
+          future: [],
+        };
+      });
+    },
+    [reducerFn, batchMs]
+  );
 
   const undo = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       if (prev.past.length === 0) return prev;
       return {
         past: prev.past.slice(0, -1),
@@ -46,7 +49,7 @@ export function useUndoReducer(reducerFn, initialState, batchMs = 600) {
   }, []);
 
   const redo = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       if (prev.future.length === 0) return prev;
       return {
         past: [...prev.past, prev.present],
