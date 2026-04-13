@@ -1,0 +1,37 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WORKDIR="/opt/gitea-runner/workspace/proposal-engine-${{ github.run_id }}"
+          rm -rf "$WORKDIR"
+          git clone --depth 1 --branch "${{ github.ref_name }}" \
+            "http://x-access-token:${GITHUB_TOKEN}@127.0.0.1:32752/${{ github.repository }}.git" \
+            "$WORKDIR"
+          echo "WORKDIR=$WORKDIR" >> "$GITHUB_ENV"
+
+      - name: Build Docker image
+        working-directory: ${{ env.WORKDIR }}
+        run: |
+          docker build -t gitea.apps.privateprompt.tech/rasmus/david-propsal-engine:latest .
+          docker tag gitea.apps.privateprompt.tech/rasmus/david-propsal-engine:latest \
+            gitea.apps.privateprompt.tech/rasmus/david-propsal-engine:${{ github.sha }}
+
+      - name: Push to Gitea Container Registry
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login gitea.apps.privateprompt.tech -u rasmus --password-stdin
+          docker push gitea.apps.privateprompt.tech/rasmus/david-propsal-engine:latest
+          docker push gitea.apps.privateprompt.tech/rasmus/david-propsal-engine:${{ github.sha }}
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf "/opt/gitea-runner/workspace/proposal-engine-${{ github.run_id }}"
