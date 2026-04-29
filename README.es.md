@@ -1,19 +1,24 @@
 # Proposal Engine
 
-Generador de propuestas comerciales (White-Label, Leads y Combo) con vista previa en tiempo real y exportacion a PDF.
+SaaS interno para que el equipo de **CreditCheck** elabore propuestas
+comerciales (White-Label, Leads — CPL/CPA/Híbrido — y Combo) con
+vista previa en tiempo real y exportación a PDF de un click. Alineado
+con el branding de [creditchecker.io](https://creditchecker.io).
 
 ## Stack
 
-- React 19
-- Vite 8
-- html2canvas + jsPDF
+- React 19 + Vite 8
+- IBM Plex Sans / Larken (con IBM Plex Serif como fallback) vía Google Fonts
+- jsPDF + html2canvas (pipeline raster a 4x)
+- Vitest (tests unitarios), ESLint, Prettier, Husky + lint-staged
+- Internacionalización: EN · ES · PT · FR · DE · IT
 
 ## Requisitos
 
-- Node.js 22 o superior
-- npm 10 o superior
+- Node.js 22+
+- npm 10+
 
-## Instalacion
+## Instalación
 
 ```bash
 npm install
@@ -25,43 +30,57 @@ npm install
 npm run dev
 ```
 
-URL de la app: `http://localhost:5173`
+URL: `http://localhost:3131` (puerto definido en `.claude/launch.json`).
 
-## Scripts Disponibles
+## Scripts disponibles
 
-- `npm run dev`: arranca el entorno de desarrollo.
-- `npm run build`: genera build de produccion.
-- `npm run preview`: sirve el build localmente.
-- `npm run lint`: ejecuta ESLint.
-- `npm run test`: ejecuta tests con Vitest.
-- `npm run format`: formatea codigo con Prettier.
-- `npm run check`: corre lint + test + build.
+- `npm run dev` — servidor de desarrollo.
+- `npm run build` — bundle de producción en `dist/`.
+- `npm run preview` — sirve el bundle de producción localmente.
+- `npm run lint` — ESLint.
+- `npm test` — suite vitest unitaria.
+- `npm run format` — Prettier (escribe).
+- `npm run format:check` — Prettier (comprueba).
+- `npm run check` — `lint` + `test` + `build`.
 
-## Estructura Principal
+## Estructura principal
 
-- `src/App.jsx`: shell principal de la aplicacion.
-- `src/components`: editor lateral por tabs y componentes de UI.
-- `src/pages`: generadores HTML de paginas para preview/PDF.
-- `src/state`: estado inicial y reducer global.
-- `src/utils/exportPdf.js`: pipeline de exportacion a PDF.
-- `src/utils/storage.js`: persistencia local del estado.
+- `src/App.jsx` — shell principal.
+- `src/components/editor/` — nuevas primitivas (TopBar, Card,
+  Field\*, CommandPalette, ShortcutsHelp, …).
+- `src/components/*Tab.jsx` — editores por sección.
+- `src/pages/gen*.js` — generadores HTML reutilizados por la vista
+  previa y la exportación a PDF.
+- `src/state/` — reducer, estado inicial y plantillas por idioma.
+- `src/utils/exportPdf.js` — pipeline de exportación PDF (raster @ 4x).
+- `src/utils/storage.js` — persistencia con debounce en localStorage.
+- `src/i18n/locales/{en,es,pt,fr,de,it}.js` — traducciones.
+- `src/design/` — tokens, temas y librería de iconos inline.
 
-## Flujo Funcional
+## Flujo funcional
 
-1. El usuario edita cliente, contenido, precios y estilo en el panel izquierdo.
-2. Se generan paginas HTML desde `src/pages` para la vista previa.
-3. Al exportar, `exportPdf` renderiza paginas y genera un PDF A4.
-4. El estado se guarda en `localStorage` con debounce.
+1. El usuario edita Cliente / Contenido / Precios / Estilo en el
+   panel izquierdo.
+2. Los generadores producen el HTML que alimenta la vista previa.
+3. Al exportar, `exportPdf.js` rasteriza cada página a 4x y genera
+   un PDF A4 (basado en PNG, con sufijo de idioma en el nombre).
+4. El estado se persiste en `localStorage` con autoguardado.
 
-## Idiomas (ES/EN)
+## Idiomas
 
-- Selector global de idioma en el panel lateral.
-- Traduccion de controles principales del editor.
-- Traduccion de textos de salida en preview y PDF.
-- El idioma seleccionado se persiste en el estado guardado.
+- Seis locales por defecto (EN, ES, PT, FR, DE, IT). EN es la
+  fuente de verdad; el resto replica las claves.
+- Selector compacto en el editor; claves por idioma en
+  `src/i18n/locales/`. CI verifica paridad.
+- Formato de moneda / número / fecha consciente del idioma en
+  `src/i18n/format.js`.
 
-## Resolucion Rapida de Problemas
+## Solución de problemas
 
-- Si falla el build: ejecuta `npm run lint` y corrige warnings/errores.
-- Si no cargan logos remotos: valida dominio o sube el logo manualmente.
-- Si falla la exportacion PDF: reduce paginas visibles y verifica imagenes externas.
+- Falla el build: ejecuta `npm run lint` y arregla warnings/errors.
+- Logos remotos: verifica el dominio o sube el logo manualmente.
+- Calidad del PDF: el 4x raster da ~1-2 MB por página A4 a densidad
+  típica de contenido.
+
+Consulta [`docs/`](./docs/) para arquitectura completa, sistema
+de diseño, guía i18n, contribución y deployment.

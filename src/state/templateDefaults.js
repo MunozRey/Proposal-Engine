@@ -4,8 +4,7 @@ export function getTemplateDefaults(language = 'en') {
   if (isEs) {
     return {
       coverBadge: 'PROPUESTA DE COLABORACION',
-      coverLine1: 'Propuesta para',
-      coverLine3: 'para',
+      coverLine1: 'Plataforma white-label para',
       productTitle: 'tu producto o servicio',
       introText:
         'La solucion se activa en el momento de la calificacion crediticia dentro del flujo del cliente. El usuario completa el consentimiento de Open Banking en una pantalla con la marca del cliente.',
@@ -155,8 +154,7 @@ export function getTemplateDefaults(language = 'en') {
 
   return {
     coverBadge: 'PARTNERSHIP PROPOSAL',
-    coverLine1: 'Proposal for',
-    coverLine3: 'for',
+    coverLine1: 'White-label platform for',
     productTitle: 'your product or service',
     introText:
       'The solution activates at the point of credit qualification in the client flow. The user completes Open Banking consent on a fully client-branded screen.',

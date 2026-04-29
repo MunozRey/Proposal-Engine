@@ -27,21 +27,12 @@ export function LeadsContentTab({ st, dispatch }) {
         />
       </div>
       <div className="field">
-        <div className="field-label">{isEs ? 'Linea 2 — azul' : 'Line 2 — blue'}</div>
+        <div className="field-label">{isEs ? 'Producto (azul)' : 'Product (blue)'}</div>
         <input
           type="text"
           value={st.productTitle}
-          placeholder={isEs ? 'generacion de leads verificados' : 'verified lead generation'}
+          placeholder={isEs ? 'generación de leads verificados' : 'verified lead generation'}
           onChange={(e) => dispatch({ t: 'SET', k: 'productTitle', v: e.target.value })}
-        />
-      </div>
-      <div className="field">
-        <div className="field-label">{isEs ? 'Linea 3 (blanco)' : 'Line 3 (white)'}</div>
-        <input
-          type="text"
-          value={st.coverLine3}
-          placeholder={isEs ? 'para' : 'for'}
-          onChange={(e) => dispatch({ t: 'SET', k: 'coverLine3', v: e.target.value })}
         />
       </div>
 

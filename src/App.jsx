@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import './App.css';
+import './components/editor/editor.css';
 import { reducer } from './state/reducer.js';
 import { INIT } from './state/initialState.js';
 import { loadState, createDebouncedSave, clearState } from './utils/storage.js';
@@ -11,6 +12,7 @@ import { LeadsContentTab } from './components/LeadsContentTab.jsx';
 import { LeadsPricingTab } from './components/LeadsPricingTab.jsx';
 import { StyleTab } from './components/StyleTab.jsx';
 import { ProposalManager } from './components/ProposalManager.jsx';
+import { PagesTab } from './components/PagesTab.jsx';
 import { PageCard } from './components/PageCard.jsx';
 import { exportPDF } from './utils/exportPdf.js';
 import { genPage1 } from './pages/genPage1.js';
@@ -20,11 +22,18 @@ import { genLeadsOverview } from './pages/leads/genLeadsOverview.js';
 import { genLeadsCPL } from './pages/leads/genLeadsCPL.js';
 import { genLeadsCPA } from './pages/leads/genLeadsCPA.js';
 import { genLeadsHybrid } from './pages/leads/genLeadsHybrid.js';
-import { t } from './i18n/translate.js';
+import { genWhyCC } from './pages/genWhyCC.js';
+import { genClose } from './pages/genClose.js';
+import { t, listLocales, normalizeLang } from './i18n/translate.js';
+import { EditorShell } from './components/editor/EditorShell.jsx';
+import { CommandPalette } from './components/editor/CommandPalette.jsx';
+import { ShortcutsHelp } from './components/editor/ShortcutsHelp.jsx';
+import { useShortcuts } from './hooks/useShortcuts.js';
+import { icon as svgIcon } from './design/icons.js';
 
-const TABS_WL = ['client', 'content', 'pricing', 'style', 'save'];
-const TABS_LEADS = ['client', 'content', 'pricing', 'style', 'save'];
-const TABS_COMBO = ['client', 'content', 'pricing', 'leadsP', 'style', 'save'];
+const TABS_WL = ['client', 'content', 'pricing', 'pages', 'style', 'save'];
+const TABS_LEADS = ['client', 'content', 'pricing', 'pages', 'style', 'save'];
+const TABS_COMBO = ['client', 'content', 'pricing', 'leadsP', 'pages', 'style', 'save'];
 
 const savedState = loadState();
 const initialState = savedState ? { ...INIT, ...savedState } : INIT;
@@ -32,11 +41,11 @@ const debouncedSave = createDebouncedSave(500);
 
 function App() {
   const { st, dispatch, undo, redo, canUndo, canRedo } = useUndoReducer(reducer, initialState);
-  const lang = st.language === 'es' ? 'es' : 'en';
+  const lang = normalizeLang(st.language);
   const [tab, setTab] = useState('client');
   const formRef = useRef(null);
-  const switchTab = useCallback((t) => {
-    setTab(t);
+  const switchTab = useCallback((next) => {
+    setTab(next);
     if (formRef.current) formRef.current.scrollTop = 0;
   }, []);
   const [zoom, setZoom] = useState(0.55);
@@ -45,15 +54,32 @@ function App() {
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState(null);
   const [lastExportJson, setLastExportJson] = useState(null);
-  const [sidebarW, setSidebarW] = useState(310);
+  const [sidebarW, setSidebarW] = useState(360);
+  const [cmdOpen, setCmdOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('saved');
   const rightRef = useRef(null);
   const dragging = useRef(false);
 
   useEffect(() => {
+    setSaveStatus('saving');
     debouncedSave(st);
+    const id = setTimeout(() => setSaveStatus('saved'), 600);
+    return () => clearTimeout(id);
   }, [st]);
 
-  const showToast = useCallback((msg, ms = 2500) => {
+  // Pre-load Larken weights so the cover and titles render in serif from the
+  // first paint instead of swapping mid-export and breaking html2canvas captures.
+  useEffect(() => {
+    if (typeof document === 'undefined' || !document.fonts) return;
+    Promise.all([
+      document.fonts.load('400 16px Larken'),
+      document.fonts.load('500 16px Larken'),
+      document.fonts.load('700 16px Larken'),
+    ]).catch(() => {});
+  }, []);
+
+  const showToast = useCallback((msg, ms = 2200) => {
     setToast(msg);
     setTimeout(() => setToast(null), ms);
   }, []);
@@ -73,34 +99,6 @@ function App() {
     }
   }, [exporting, st, showToast, lang]);
 
-  useEffect(() => {
-    const handler = (e) => {
-      const ctrl = e.ctrlKey || e.metaKey;
-      if (!ctrl) return;
-      if (e.key === 'z' || e.key === 'Z') {
-        e.preventDefault();
-        if (e.shiftKey) {
-          if (canRedo) {
-            redo();
-            showToast(`↻ ${t(lang, 'app.toastRedo')}`);
-          }
-        } else {
-          if (canUndo) {
-            undo();
-            showToast(`↶ ${t(lang, 'app.toastUndo')}`);
-          }
-        }
-        return;
-      }
-      if (e.key === 'e' || e.key === 'E') {
-        e.preventDefault();
-        handleExport();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [canUndo, canRedo, undo, redo, handleExport, showToast, lang]);
-
   /* ── Sidebar resize drag ─────────────────────────── */
   const onDragStart = useCallback((e) => {
     e.preventDefault();
@@ -108,7 +106,7 @@ function App() {
     const move = (ev) => {
       if (!dragging.current) return;
       const x = ev.clientX;
-      setSidebarW(Math.max(240, Math.min(520, x)));
+      setSidebarW(Math.max(280, Math.min(560, x)));
     };
     const up = () => {
       dragging.current = false;
@@ -138,15 +136,18 @@ function App() {
   }, [calcZoom]);
 
   useEffect(() => {
-    const t = setTimeout(calcZoom, 250);
-    return () => clearTimeout(t);
+    const id = setTimeout(calcZoom, 250);
+    return () => clearTimeout(id);
   }, [collapsed, calcZoom]);
 
-  const handleTypeChange = (type) => {
-    dispatch({ t: 'SET', k: 'proposalType', v: type });
-    setTab('client');
-  };
-  const handleReset = () => {
+  const handleTypeChange = useCallback(
+    (type) => {
+      dispatch({ t: 'SET', k: 'proposalType', v: type });
+      setTab('client');
+    },
+    [dispatch]
+  );
+  const handleReset = useCallback(() => {
     if (window.confirm(t(lang, 'app.resetConfirm'))) {
       dispatch({ t: 'RESET' });
       clearState();
@@ -154,18 +155,81 @@ function App() {
       setLastExportJson(null);
       showToast(`✓ ${t(lang, 'app.toastReset')}`);
     }
-  };
+  }, [dispatch, lang, showToast]);
 
   const pType = st.proposalType;
   const isLeads = pType === 'leads';
   const isCombo = pType === 'combo';
   const tabsDef = isCombo ? TABS_COMBO : isLeads ? TABS_LEADS : TABS_WL;
 
+  /* ── Tab labels via i18n ─────────────────────────── */
+  const tabLabels = useMemo(
+    () => ({
+      client: t(lang, 'tabs.client'),
+      content: t(lang, 'tabs.content'),
+      pricing: t(lang, 'tabs.pricing'),
+      leadsP: t(lang, 'tabs.leadsPricing'),
+      pages: t(lang, 'tabs.pages'),
+      style: t(lang, 'tabs.style'),
+      save: t(lang, 'tabs.save'),
+    }),
+    [lang]
+  );
+
+  /* ── Completion estimation per tab (for the dot badge) ── */
+  const tabCompletion = useMemo(() => {
+    const safe = (v) => (v && String(v).trim() !== '' ? 1 : 0);
+    const clientFilled = safe(st.clientName);
+    const contentFilled =
+      safe(st.coverLine1) +
+      safe(st.productTitle) +
+      safe(st.steps?.[0]?.title) +
+      safe(st.steps?.[1]?.title) +
+      safe(st.steps?.[2]?.title);
+    const pricingFilled = (st.pricingPlans || []).filter((p) => p.title && p.price).length;
+    return {
+      client: clientFilled ? 1 : 0,
+      content: contentFilled >= 4 ? 1 : contentFilled >= 1 ? 0.5 : 0,
+      pricing: pricingFilled >= 3 ? 1 : pricingFilled >= 1 ? 0.5 : 0,
+      leadsP: 0.5,
+      style: 0.5,
+      save: 1,
+    };
+  }, [st]);
+
+  const completedFields = useMemo(() => {
+    let n = 0;
+    if (st.clientName) n++;
+    if (st.coverLine1) n++;
+    if (st.productTitle) n++;
+    if (st.date) n++;
+    if (st.clientLogoUrl) n++;
+    if (st.ccLogoUrl) n++;
+    if (st.steps?.[0]?.title) n++;
+    if (st.steps?.[1]?.title) n++;
+    if (st.steps?.[2]?.title) n++;
+    if ((st.pricingPlans || []).filter((p) => p.title).length >= 3) n++;
+    if (st.brandNavy && st.brandBlue) n++;
+    return n;
+  }, [st]);
+  const totalFields = 12;
+
   /* ── Dynamic page numbering ──────────────────────── */
   const allPageDefs = useMemo(() => {
+    const whyCC = {
+      id: 'whyCC',
+      baseLabel: t(lang, 'pageTitles.whyCC'),
+      gen: (n) => genWhyCC(st, n),
+    };
+    const closing = {
+      id: 'close',
+      baseLabel: t(lang, 'pageTitles.close'),
+      gen: (n) => genClose(st, n),
+    };
     if (pType === 'combo') {
       return [
         { id: 'cover', baseLabel: t(lang, 'pageTitles.cover'), gen: () => genPage1(st) },
+        whyCC,
         { id: 'how', baseLabel: t(lang, 'pageTitles.howItWorks'), gen: (n) => genPage2(st, n) },
         { id: 'pricing', baseLabel: t(lang, 'pageTitles.wlPricing'), gen: (n) => genPage3(st, n) },
         {
@@ -180,11 +244,13 @@ function App() {
           baseLabel: t(lang, 'pageTitles.hybridModel'),
           gen: (n) => genLeadsHybrid(st, n),
         },
+        closing,
       ];
     }
     if (pType === 'leads') {
       return [
         { id: 'cover', baseLabel: t(lang, 'pageTitles.cover'), gen: () => genPage1(st) },
+        whyCC,
         {
           id: 'overview',
           baseLabel: t(lang, 'pageTitles.overview'),
@@ -197,31 +263,32 @@ function App() {
           baseLabel: t(lang, 'pageTitles.hybridModel'),
           gen: (n) => genLeadsHybrid(st, n),
         },
+        closing,
       ];
     }
     return [
       { id: 'cover', baseLabel: t(lang, 'pageTitles.cover'), gen: () => genPage1(st) },
+      whyCC,
       { id: 'how', baseLabel: t(lang, 'pageTitles.howItWorks'), gen: (n) => genPage2(st, n) },
       { id: 'pricing', baseLabel: t(lang, 'pageTitles.pricing'), gen: (n) => genPage3(st, n) },
+      closing,
     ];
   }, [st, pType, lang]);
 
-  // All pages with labels (for toggle list)
   const allPages = useMemo(() => {
     let idx = 0;
     return allPageDefs.map((p) => {
-      if (p.id === 'cover') return { id: p.id, label: p.baseLabel, html: p.gen() }; // baseLabel is already English
+      if (p.id === 'cover') return { id: p.id, label: p.baseLabel, html: p.gen() };
       idx++;
       const num = String(idx).padStart(2, '0');
       return {
         id: p.id,
-        label: `${lang === 'es' ? 'Pag.' : 'Pg.'} ${idx + 1} — ${p.baseLabel}`,
+        label: `${lang === 'en' ? 'Pg.' : 'Pag.'} ${idx + 1} — ${p.baseLabel}`,
         html: p.gen(num),
       };
     });
   }, [allPageDefs, lang]);
 
-  // Visible pages with RENUMBERED content
   const visiblePages = useMemo(() => {
     const hidden = new Set(st.hiddenPages || []);
     const visDefs = allPageDefs.filter((p) => !hidden.has(p.id));
@@ -232,7 +299,7 @@ function App() {
       const num = String(contentIdx).padStart(2, '0');
       return {
         id: p.id,
-        label: `${lang === 'es' ? 'Pag.' : 'Pg.'} ${contentIdx + 1} — ${p.baseLabel}`,
+        label: `${lang === 'en' ? 'Pg.' : 'Pag.'} ${contentIdx + 1} — ${p.baseLabel}`,
         html: p.gen(num),
       };
     });
@@ -241,230 +308,262 @@ function App() {
   const visiblePagesRef = useRef(visiblePages);
   visiblePagesRef.current = visiblePages;
 
+  /* ── Keyboard shortcuts ─────────────────────────── */
+  useShortcuts(
+    [
+      {
+        combo: 'mod+z',
+        handler: () => {
+          if (canUndo) {
+            undo();
+            showToast(`↶ ${t(lang, 'app.toastUndo')}`);
+          }
+        },
+      },
+      {
+        combo: ['mod+shift+z', 'mod+y'],
+        handler: () => {
+          if (canRedo) {
+            redo();
+            showToast(`↻ ${t(lang, 'app.toastRedo')}`);
+          }
+        },
+      },
+      { combo: 'mod+e', handler: () => handleExport() },
+      { combo: 'mod+k', handler: () => setCmdOpen(true), allowInInputs: true },
+      { combo: 'mod+/', handler: () => setShortcutsOpen(true), allowInInputs: true },
+      {
+        combo: 'escape',
+        handler: () => {
+          setCmdOpen(false);
+          setShortcutsOpen(false);
+        },
+        allowInInputs: true,
+      },
+    ],
+    [canUndo, canRedo, undo, redo, handleExport, lang]
+  );
+
+  /* ── Command palette commands ───────────────────── */
+  const commands = useMemo(() => {
+    const items = [];
+    items.push(
+      {
+        id: 'export',
+        label: t(lang, 'app.exportPdf'),
+        icon: 'download',
+        section: 'Actions',
+        combo: 'mod+e',
+        run: () => handleExport(),
+      },
+      {
+        id: 'undo',
+        label: t(lang, 'app.undo'),
+        icon: 'arrowRight',
+        section: 'Actions',
+        combo: 'mod+z',
+        run: () => canUndo && undo(),
+      },
+      {
+        id: 'redo',
+        label: t(lang, 'app.redo'),
+        icon: 'arrowRight',
+        section: 'Actions',
+        combo: 'mod+shift+z',
+        run: () => canRedo && redo(),
+      },
+      {
+        id: 'reset',
+        label: t(lang, 'app.reset'),
+        icon: 'xCircle',
+        section: 'Actions',
+        run: () => handleReset(),
+      },
+      {
+        id: 'shortcuts',
+        label: t(lang, 'app.keyboardShortcuts'),
+        icon: 'key',
+        section: 'Help',
+        combo: 'mod+/',
+        run: () => setShortcutsOpen(true),
+      },
+      {
+        id: 'collapse',
+        label: collapsed ? t(lang, 'app.openPanel') : t(lang, 'app.collapse'),
+        icon: 'arrowRight',
+        section: 'View',
+        run: () => setCollapsed((c) => !c),
+      }
+    );
+    tabsDef.forEach((id) => {
+      items.push({
+        id: `goto-${id}`,
+        label: `${t(lang, 'shared.search')}: ${tabLabels[id]}`,
+        icon: 'fileSearch',
+        section: 'Navigate',
+        run: () => switchTab(id),
+      });
+    });
+    listLocales().forEach((loc) => {
+      items.push({
+        id: `lang-${loc.code}`,
+        label: `${loc.flag} ${loc.nativeName}`,
+        icon: 'globe',
+        section: t(lang, 'languageLabel'),
+        run: () => dispatch({ t: 'LOCALIZE_TEMPLATE', v: loc.code }),
+      });
+    });
+    return items;
+  }, [
+    lang,
+    tabsDef,
+    tabLabels,
+    collapsed,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    handleExport,
+    handleReset,
+    dispatch,
+    switchTab,
+  ]);
+
+  /* ── Shortcuts list (for help modal) ─────────────── */
+  const shortcutsList = useMemo(
+    () => [
+      { label: t(lang, 'app.exportPdf'), combo: 'mod+e' },
+      { label: t(lang, 'app.undo'), combo: 'mod+z' },
+      { label: t(lang, 'app.redo'), combo: ['mod+shift+z', 'mod+y'] },
+      { label: t(lang, 'app.commandPalette'), combo: 'mod+k' },
+      { label: t(lang, 'app.keyboardShortcuts'), combo: 'mod+/' },
+    ],
+    [lang]
+  );
+
+  const proposalTypeLabels = {
+    wl: t(lang, 'proposalType.wl'),
+    leads: t(lang, 'proposalType.leads'),
+    combo: t(lang, 'proposalType.combo'),
+  };
+  const currentTypeLabel = isCombo
+    ? proposalTypeLabels.combo
+    : isLeads
+      ? proposalTypeLabels.leads
+      : proposalTypeLabels.wl;
+
   return (
     <>
       {collapsed && (
         <button
-          className="sidebar-toggle-open"
+          className="ed-open-btn"
           title={t(lang, 'app.openPanel')}
           onClick={() => setCollapsed(false)}
-        >
-          ▶
-        </button>
+          dangerouslySetInnerHTML={{ __html: svgIcon('arrowRight', { size: 18, color: '#fff' }) }}
+        />
       )}
       {toast && (
-        <div className="toast" key={toast + Date.now()}>
+        <div className="ed-toast" key={toast + Date.now()}>
           {toast}
         </div>
       )}
 
-      <div
-        id="left"
-        className={collapsed ? 'collapsed' : ''}
-        style={collapsed ? {} : { width: sidebarW, minWidth: sidebarW }}
+      <EditorShell
+        appTitle={t(lang, 'app.title')}
+        proposalTypeLabel={currentTypeLabel}
+        proposalName={st.clientName}
+        lang={lang}
+        onLangChange={(v) => dispatch({ t: 'LOCALIZE_TEMPLATE', v })}
+        proposalType={pType}
+        onProposalTypeChange={handleTypeChange}
+        proposalTypeLabels={proposalTypeLabels}
+        tab={tab}
+        setTab={switchTab}
+        tabsDef={tabsDef}
+        tabLabels={tabLabels}
+        tabCompletion={tabCompletion}
+        onCommandPalette={() => setCmdOpen(true)}
+        onShortcuts={() => setShortcutsOpen(true)}
+        saveStatus={saveStatus}
+        saveLabel={
+          saveStatus === 'saving'
+            ? t(lang, 'app.saving')
+            : hasUnsavedChanges
+              ? t(lang, 'app.unsaved')
+              : t(lang, 'app.saved')
+        }
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={() => {
+          if (canUndo) {
+            undo();
+            showToast(`↶ ${t(lang, 'app.toastUndo')}`);
+          }
+        }}
+        onRedo={() => {
+          if (canRedo) {
+            redo();
+            showToast(`↻ ${t(lang, 'app.toastRedo')}`);
+          }
+        }}
+        zoom={zoom}
+        onZoomChange={(v) => {
+          setAutoFit(false);
+          setZoom(v);
+        }}
+        autoFit={autoFit}
+        onFit={() => {
+          setAutoFit(true);
+          calcZoom();
+        }}
+        onExport={handleExport}
+        exporting={exporting}
+        exportLabel={t(lang, 'app.exportPdf')}
+        generatingLabel={t(lang, 'app.generating')}
+        ctrlEHint={t(lang, 'app.downloadsAsPdf')}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onReset={handleReset}
+        resetLabel={t(lang, 'app.reset')}
+        completedFields={completedFields}
+        totalFields={totalFields}
+        collapsed={collapsed}
+        onCollapse={() => setCollapsed(true)}
+        width={sidebarW}
+        searchPlaceholder={t(lang, 'app.searchPlaceholder', { shortcut: 'Ctrl+K' })}
       >
-        <div id="panel-header">
-          <div id="panel-header-text">
-            <h1>{t(lang, 'app.title')}</h1>
-            <p>
-              {isCombo
-                ? t(lang, 'proposalType.combo')
-                : isLeads
-                  ? t(lang, 'proposalType.leads')
-                  : t(lang, 'proposalType.wl')}
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-            <button
-              className="sidebar-toggle"
-              title={`${t(lang, 'app.undo')} (Ctrl+Z)`}
-              style={{ opacity: canUndo ? 1 : 0.3 }}
-              onClick={() => {
-                if (canUndo) {
-                  undo();
-                  showToast(`↶ ${t(lang, 'app.toastUndo')}`);
-                }
-              }}
-            >
-              ↶
-            </button>
-            <button
-              className="sidebar-toggle"
-              title={`${t(lang, 'app.redo')} (Ctrl+Shift+Z)`}
-              style={{ opacity: canRedo ? 1 : 0.3 }}
-              onClick={() => {
-                if (canRedo) {
-                  redo();
-                  showToast(`↻ ${t(lang, 'app.toastRedo')}`);
-                }
-              }}
-            >
-              ↻
-            </button>
-            <button
-              className="sidebar-toggle"
-              title={t(lang, 'app.collapse')}
-              onClick={() => setCollapsed(true)}
-            >
-              ◀
-            </button>
-          </div>
-        </div>
-        <div
-          style={{
-            padding: '8px 10px',
-            borderBottom: '1px solid var(--border-lt)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <span style={{ fontSize: '10px', color: 'var(--t-muted)', fontWeight: 700 }}>
-            {t(lang, 'languageLabel')}
-          </span>
-          <select
-            value={lang}
-            onChange={(e) => {
-              const nextLang = e.target.value;
-              dispatch({ t: 'LOCALIZE_TEMPLATE', v: nextLang });
-            }}
-            style={{ flex: 1 }}
-          >
-            <option value="en">{t(lang, 'langEnglish')}</option>
-            <option value="es">{t(lang, 'langSpanish')}</option>
-          </select>
-        </div>
-
-        <div id="type-selector">
-          <button
-            className={`type-btn${pType === 'wl' ? ' active' : ''}`}
-            onClick={() => handleTypeChange('wl')}
-          >
-            {t(lang, 'proposalType.wl')}
-          </button>
-          <button
-            className={`type-btn${pType === 'leads' ? ' active' : ''}`}
-            onClick={() => handleTypeChange('leads')}
-          >
-            {t(lang, 'proposalType.leads')}
-          </button>
-          <button
-            className={`type-btn${pType === 'combo' ? ' active' : ''}`}
-            onClick={() => handleTypeChange('combo')}
-          >
-            {t(lang, 'proposalType.combo')}
-          </button>
-        </div>
-
-        <div id="tabs">
-          {tabsDef.map((id) => (
-            <div
-              key={id}
-              className={`tab${tab === id ? ' active' : ''}`}
-              onClick={() => switchTab(id)}
-            >
-              {id === 'leadsP' ? t(lang, 'tabs.leadsPricing') : t(lang, `tabs.${id}`)}
-            </div>
-          ))}
-        </div>
-        <div id="form-area" ref={formRef}>
-          <div className="tab-content" key={tab}>
-            {tab === 'client' && <ClientTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />}
-            {tab === 'content' &&
-              (isLeads ? (
-                <LeadsContentTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
-              ) : (
-                <ContentTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
-              ))}
-            {tab === 'pricing' &&
-              (isLeads ? (
-                <LeadsPricingTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
-              ) : (
-                <PricingTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
-              ))}
-            {tab === 'leadsP' && (
+        <div ref={formRef} key={tab}>
+          {tab === 'client' && <ClientTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />}
+          {tab === 'content' &&
+            (isLeads ? (
+              <LeadsContentTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
+            ) : (
+              <ContentTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
+            ))}
+          {tab === 'pricing' &&
+            (isLeads ? (
               <LeadsPricingTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
-            )}
-            {tab === 'style' && (
-              <StyleTab st={st} dispatch={dispatch} allPages={allPages} t={(k) => t(lang, k)} />
-            )}
-            {tab === 'save' && (
-              <ProposalManager
-                st={st}
-                dispatch={dispatch}
-                showToast={showToast}
-                t={(k) => t(lang, k)}
-              />
-            )}
-          </div>
-        </div>
-        <div id="export-bar">
-          <div id="zoom-bar">
-            <span>{t(lang, 'app.zoom')}</span>
-            <input
-              type="range"
-              min="0.25"
-              max="1.5"
-              step="0.01"
-              value={zoom}
-              onChange={(e) => {
-                setAutoFit(false);
-                setZoom(parseFloat(e.target.value));
-              }}
+            ) : (
+              <PricingTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
+            ))}
+          {tab === 'leadsP' && (
+            <LeadsPricingTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
+          )}
+          {tab === 'pages' && <PagesTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />}
+          {tab === 'style' && (
+            <StyleTab st={st} dispatch={dispatch} allPages={allPages} t={(k) => t(lang, k)} />
+          )}
+          {tab === 'save' && (
+            <ProposalManager
+              st={st}
+              dispatch={dispatch}
+              showToast={showToast}
+              t={(k) => t(lang, k)}
             />
-            <span className="zoom-val">{Math.round(zoom * 100)}%</span>
-            <button
-              title={t(lang, 'app.fitWidth')}
-              onClick={() => {
-                setAutoFit(true);
-                calcZoom();
-              }}
-              style={{
-                background: autoFit ? 'var(--blue)' : '#F0F2F5',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '3px 6px',
-                fontSize: '10px',
-                fontWeight: 700,
-                color: autoFit ? '#fff' : '#7A8FA0',
-                cursor: 'pointer',
-                flexShrink: 0,
-              }}
-            >
-              ⊡
-            </button>
-          </div>
-          <button
-            className={`export-btn${hasUnsavedChanges ? ' has-changes' : ''}`}
-            disabled={exporting}
-            onClick={handleExport}
-          >
-            {exporting ? `⏳ ${t(lang, 'app.generating')}` : `⬇ ${t(lang, 'app.exportPdf')}`}
-          </button>
-          <div
-            style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}
-          >
-            <small>Ctrl+E · {t(lang, 'app.downloadsAsPdf')}</small>
-            <button
-              onClick={handleReset}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '9px',
-                color: '#B0432A',
-                cursor: 'pointer',
-                fontWeight: 600,
-                padding: 0,
-              }}
-            >
-              ↺ {t(lang, 'app.reset')}
-            </button>
-          </div>
+          )}
         </div>
-      </div>
+      </EditorShell>
 
-      {/* Resize handle */}
-      {!collapsed && <div className="sidebar-resize" onMouseDown={onDragStart} />}
+      {!collapsed && <div className="ed-resize" onMouseDown={onDragStart} />}
 
       <div id="right" ref={rightRef}>
         <div id="preview-label">{t(lang, 'app.preview')}</div>
@@ -474,6 +573,19 @@ function App() {
           ))}
         </div>
       </div>
+
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        commands={commands}
+        placeholder={t(lang, 'app.searchPlaceholder', { shortcut: 'Ctrl+K' })}
+      />
+      <ShortcutsHelp
+        open={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+        shortcuts={shortcutsList}
+        title={t(lang, 'app.keyboardShortcuts')}
+      />
     </>
   );
 }

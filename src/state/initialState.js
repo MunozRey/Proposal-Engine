@@ -101,11 +101,39 @@ export const INIT = {
   productTitle: '',
   coverBadge: 'PARTNERSHIP PROPOSAL',
   coverLine1: '',
+  // Deprecated: coverLine3 was the third title line. The new cover has two lines.
+  // Kept for back-compat with stored proposals — generators ignore it.
   coverLine3: '',
 
   // ── Brand colors (empty = use defaults from constants.js) ──
   brandNavy: '',
   brandBlue: '',
+  brandAccent: '',
+  fontDisplay: '',
+  fontBody: '',
+  fontMono: '',
+  activeThemeId: 'creditcheck',
+
+  // ── Why CreditCheck page (editable hero metrics + value props) ──
+  whyIntro: '',
+  metrics: [], // [{ value, label }, ...]
+  valueProps: [], // [{ title, desc }, ...]
+
+  // ── Closing page (timeline, contact, validity) ─────────────
+  closeSteps: [], // [{ title, desc }, ...]
+  contact: {
+    // overridable per-proposal contact card
+    name: '',
+    role: '',
+    email: '',
+    phone: '',
+    avatarUrl: '',
+  },
+  validUntil: '', // free-text, e.g. "May 31, 2026"
+  proposalNumber: '',
+
+  // ── Currency / locale (locale-aware formatters use these) ──
+  currency: 'EUR',
 
   // ── Footer / Header (editables) ─────────────────────────────
   footerLeft: 'Your Company · Confidential',

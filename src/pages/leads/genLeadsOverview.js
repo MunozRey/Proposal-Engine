@@ -1,99 +1,132 @@
-import { GREY, TC } from '../../constants.js';
+// Leads overview. Three model cards with distinct accent colors (blue/mint/violet)
+// to break the "three blues" problem. Below: real lead schema —
+// what the buyer actually receives per delivered lead. Less dense than v1.
+
 import { esc } from '../../utils/esc.js';
-import { hdrStr, bulletItem, ftrStr, getColors } from '../../utils/pageHelpers.js';
+import {
+  hdrStr,
+  ftrStr,
+  getColors,
+  FONTS,
+  eyebrowStr,
+  titleStr,
+  leadStr,
+  bulletItem,
+} from '../../utils/pageHelpers.js';
+
+const MODEL_ACCENTS = {
+  CPL: '#005EFF',
+  CPA: '#22D3A0',
+  Hybrid: '#7C5CFF',
+};
 
 export function genLeadsOverview(st, pageNum = '01') {
-  const { N, B } = getColors(st);
+  const { N } = getColors(st);
   const isEs = st.language === 'es';
-  const T = st.typo;
-  const l = st.leads;
-  const CT = 64;
+  const l = st.leads || {};
 
   const intro =
     l.overviewIntro ||
     (isEs
-      ? `CreditCheck capta y entrega leads verificados via Open Banking para ${st.clientName || 'el cliente'}.`
-      : `CreditCheck captures and delivers verified leads via Open Banking for ${st.clientName || 'the client'}.`);
+      ? `CreditCheck capta y entrega leads pre-cualificados vía Open Banking para ${st.clientName || 'el cliente'}.`
+      : `CreditCheck captures and delivers Open Banking pre-qualified leads for ${st.clientName || 'the client'}.`);
 
-  const cplPrice = `${l.cplLeads[0]?.price || '€12'} – ${l.cplLeads[1]?.price || '€20'}`;
-  const cpaPrice = `${l.cpaTramos[0]?.fee || '€30'} – ${l.cpaTramos.slice(-1)[0]?.fee || '€150'}`;
+  const cplPrice = `${l.cplLeads?.[0]?.price || '€12'} – ${l.cplLeads?.[1]?.price || '€20'}`;
+  const cpaPrice = `${l.cpaTramos?.[0]?.fee || '€30'} – ${l.cpaTramos?.slice(-1)?.[0]?.fee || '€150'}`;
 
   const cards = [
     {
+      key: 'CPL',
       label: 'CPL',
-      name: isEs ? 'Coste por Lead' : 'Cost Per Lead',
-      price: cplPrice + (isEs ? ' / lead' : ' / lead'),
-      sub: isEs ? 'fee fijo por lead entregado' : 'fixed fee per delivered lead',
-      accent: B,
-      features: l.cplFeatures.slice(0, 3),
+      name: isEs ? 'Coste por Lead' : 'Cost per Lead',
+      price: cplPrice,
+      per: isEs ? '/ lead' : '/ lead',
+      sub: isEs ? 'Fee fijo por lead entregado' : 'Fixed fee per delivered lead',
+      accent: MODEL_ACCENTS.CPL,
+      features: (l.cplFeatures || []).slice(0, 3),
     },
     {
+      key: 'CPA',
       label: 'CPA',
-      name: isEs ? 'Coste por Adquisicion' : 'Cost Per Acquisition',
+      name: isEs ? 'Coste por Adquisición' : 'Cost per Acquisition',
       price: cpaPrice,
+      per: '',
       sub: isEs
-        ? `fee por tramos + comision ${l.cpaCommission || '1.5%'}`
-        : `tiered fee + ${l.cpaCommission || '1.5%'} commission`,
-      accent: '#1A3A6B',
-      features: l.cpaFeatures.slice(0, 3),
+        ? `Fee por tramos + comisión ${l.cpaCommission || '1.5%'}`
+        : `Tiered fee + ${l.cpaCommission || '1.5%'} commission`,
+      accent: MODEL_ACCENTS.CPA,
+      features: (l.cpaFeatures || []).slice(0, 3),
     },
     {
+      key: 'Hybrid',
       label: 'HYBRID',
-      name: isEs ? 'CPL Base + Bonus CPA' : 'Base CPL + CPA Bonus',
-      price: `${l.hybridCPLPrice || '€8'} + ${isEs ? 'bonus' : 'bonus'}`,
-      sub: isEs
-        ? `CPL reducido + bonus CPA ${l.hybridCPAFee || '€50'}`
-        : `reduced CPL + ${l.hybridCPAFee || '€50'} CPA bonus`,
-      accent: '#2A4D8F',
-      features: l.hybridFeatures.slice(0, 3),
+      name: isEs ? 'CPL base + bonus CPA' : 'Base CPL + CPA bonus',
+      price: `${l.hybridCPLPrice || '€8'} + ${l.hybridCPAFee || '€50'}`,
+      per: '',
+      sub: isEs ? 'CPL reducido + bonus por formalización' : 'Reduced CPL + bonus on close',
+      accent: MODEL_ACCENTS.Hybrid,
+      features: (l.hybridFeatures || []).slice(0, 3),
     },
   ];
 
-  const cardHtml = cards
-    .map(
-      (c) => `
-    <div style="background:#fff;border-radius:4px;overflow:hidden;border:.5px solid #C8D8E8;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-      <div style="background:${c.accent};padding:5px 8px;display:flex;align-items:baseline;gap:5px">
-        <span style="font-size:7.5px;font-weight:800;color:#fff;letter-spacing:.05em">${c.label}</span>
-        <span style="font-size:${T.micro}px;color:rgba(255,255,255,.65);font-weight:400">${c.name}</span>
-      </div>
-      <div style="padding:7px 8px">
-        <div style="font-size:11px;font-weight:800;color:${c.accent};line-height:1;margin-bottom:1px">${c.price}</div>
-        <div style="font-size:${T.micro}px;color:#718096;margin-bottom:6px;line-height:1.4">${c.sub}</div>
-        ${c.features.map((f) => bulletItem(esc(f), TC, st)).join('')}
-      </div>
-    </div>`
-    )
-    .join('');
+  const cardHtml = cards.map((c) => modelCard(c, st)).join('');
 
-  const commonFeats = [
-    isEs ? 'Lead con Open Banking completado al 100%' : 'Lead with 100% completed Open Banking',
-    isEs ? 'Ingreso neto mensual verificado' : 'Monthly net income verified',
-    isEs ? 'Ratio de esfuerzo y DTI calculados' : 'Effort ratio and DTI calculated',
-    isEs ? 'Datos de contacto e IBAN validados' : 'Contact details and IBAN validated',
+  // Real "what's in each lead" — sourced from CreditCheck data guide.
+  const includedLeft = [
+    isEs ? 'Nombre, email y teléfono verificados' : 'Verified name, email and phone',
+    isEs ? 'Open Banking completado al 100%' : '100% completed Open Banking flow',
+    isEs ? 'Ingreso neto mensual verificado' : 'Verified monthly net income',
+  ];
+  const includedRight = [
+    isEs ? 'Importe de préstamo y plazo deseado' : 'Desired loan amount and term',
+    isEs ? 'Situación laboral y dependientes' : 'Employment status and dependants',
+    isEs ? 'IBAN validado y consentimiento legal' : 'Validated IBAN and legal consent',
   ];
 
-  return `<div style="width:595px;height:842px;background:${GREY};position:relative;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif">
+  return `
+<div style="width:595px;height:842px;background:#FAFBFD;position:relative;overflow:hidden;font-family:${FONTS.SANS}">
   ${hdrStr(pageNum, isEs ? 'Propuesta Leads' : 'Leads Proposal', st)}
-  <div style="position:absolute;top:${CT}px;left:14px;right:14px;font-family:inherit">
-    <div style="font-size:${T.heading}px;font-weight:800;color:${N}">${pageNum}  ${isEs ? 'Propuesta de Leads Verificados' : 'Verified Leads Proposal'}</div>
-    <div style="height:1.5px;background:${B};margin:4px 0 7px"></div>
-    <div style="font-size:${T.body}px;color:${TC};line-height:1.6;margin-bottom:10px">${esc(intro)}</div>
-    <div style="font-size:${T.subhead}px;font-weight:800;color:${N};margin-bottom:7px">${isEs ? 'Modelos de colaboracion disponibles' : 'Available collaboration models'}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px">${cardHtml}</div>
-    <div style="background:${N};border-radius:4px;padding:8px 10px">
-      <div style="font-size:${T.body}px;font-weight:700;color:#fff;margin-bottom:6px">${isEs ? 'Que incluye cada lead — verificado via Open Banking' : 'What each lead includes — verified via Open Banking'}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8px">
-        <div>${commonFeats
-          .slice(0, 2)
-          .map((f) => bulletItem(esc(f), '#fff', st))
-          .join('')}</div>
-        <div>${commonFeats
-          .slice(2)
-          .map((f) => bulletItem(esc(f), '#90B8FF', st))
-          .join('')}</div>
+
+  <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
+    ${eyebrowStr(isEs ? 'Modelos disponibles' : 'Available models')}
+    ${titleStr(isEs ? 'Tres modelos de colaboración' : 'Three collaboration models', N, 22)}
+    <div style="height:12px"></div>
+    ${leadStr(intro, '#3D5166', 11)}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-top:22px">${cardHtml}</div>
+
+    <!-- Lead deliverable: real CreditCheck data points -->
+    <div style="background:${N};border-radius:12px;padding:16px 20px;margin-top:18px;font-family:${FONTS.SANS}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:5px;height:5px;border-radius:50%;background:#FFCC00"></span>
+        <span style="font-size:9px;color:rgba(255,255,255,.65);letter-spacing:0.1em;text-transform:uppercase;font-family:${FONTS.MONO}">${isEs ? 'Cada lead incluye' : 'Each lead includes'}</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:12px;letter-spacing:-0.01em">${isEs ? 'Datos verificados con Open Banking, listos para tu motor de underwriting' : 'Open Banking-verified data, ready for your underwriting engine'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px">
+        <div>${includedLeft.map((f) => bulletItem(f, 'rgba(255,255,255,.85)', st)).join('')}</div>
+        <div>${includedRight.map((f) => bulletItem(f, 'rgba(255,255,255,.7)', st)).join('')}</div>
       </div>
     </div>
   </div>
-  ${ftrStr(st)}</div>`;
+
+  ${ftrStr(st)}
+</div>`;
+}
+
+function modelCard(c, st) {
+  const { N } = getColors(st);
+  return `
+  <div style="background:#fff;border:1px solid #E6ECF3;border-radius:12px;overflow:hidden;font-family:${FONTS.SANS};display:flex;flex-direction:column">
+    <div style="height:3px;background:${c.accent}"></div>
+    <div style="padding:14px 14px 12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="background:${c.accent}14;color:${c.accent};font-family:${FONTS.MONO};font-size:8.5px;font-weight:700;letter-spacing:0.08em;padding:3px 7px;border-radius:9999px">${c.label}</span>
+        <span style="font-size:8.5px;color:#6B7B92">${esc(c.name)}</span>
+      </div>
+      <div style="font-family:${FONTS.SERIF};font-size:18px;font-weight:600;color:${N};letter-spacing:-0.02em;line-height:1.1;margin-bottom:3px">${esc(c.price)} <span style="font-family:${FONTS.SANS};font-size:9px;color:#6B7B92;font-weight:400">${esc(c.per || '')}</span></div>
+      <div style="font-size:9.5px;color:#6B7B92;line-height:1.45;margin-bottom:10px">${esc(c.sub)}</div>
+      <div style="height:1px;background:#F0F2F5;margin-bottom:8px"></div>
+      ${c.features.map((f) => bulletItem(esc(f), '#3D5166', st)).join('')}
+    </div>
+  </div>`;
 }

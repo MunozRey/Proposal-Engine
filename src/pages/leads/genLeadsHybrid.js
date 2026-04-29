@@ -1,4 +1,6 @@
-import { GREY, TC } from '../../constants.js';
+// Hybrid model. Violet accent (Hybrid). Two components shown side-by-side
+// with clear labelling, then calc + features.
+
 import { esc } from '../../utils/esc.js';
 import {
   hdrStr,
@@ -7,52 +9,59 @@ import {
   featureBoxStr,
   notesStr,
   getColors,
+  FONTS,
+  eyebrowStr,
+  titleStr,
+  leadStr,
 } from '../../utils/pageHelpers.js';
 
+const ACCENT = '#7C5CFF';
+
 export function genLeadsHybrid(st, pageNum = '04') {
-  const { N, B } = getColors(st);
+  const { N } = getColors(st);
   const isEs = st.language === 'es';
-  const T = st.typo;
-  const l = st.leads;
-  const CT = 64;
+  const l = st.leads || {};
 
   const intro =
     l.hybridIntro ||
     (isEs
-      ? 'Combinacion de CPL base reducido mas bonus CPA al formalizar. Cubre coste de adquisicion y premia conversion real.'
+      ? 'Combinación de CPL base reducido más bonus CPA al formalizar. Cubre coste de adquisición y premia la conversión real.'
       : 'Combination of reduced base CPL plus CPA bonus upon formalization. Covers acquisition costs and rewards real conversion.');
 
-  return `<div style="width:595px;height:842px;background:${GREY};position:relative;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif">
-  ${hdrStr(pageNum, isEs ? 'Modelo Hibrido' : 'Hybrid Model', st)}
-  <div style="position:absolute;top:${CT}px;left:14px;right:14px;font-family:inherit">
-    <div style="font-size:${T.heading}px;font-weight:800;color:${N}">${pageNum}  ${isEs ? 'Modelo Hibrido — CPL + CPA' : 'Hybrid Model — CPL + CPA'}</div>
-    <div style="height:1.5px;background:${B};margin:4px 0 7px"></div>
-    <div style="font-size:${T.body}px;color:${TC};line-height:1.6;margin-bottom:9px">${esc(intro)}</div>
+  return `
+<div style="width:595px;height:842px;background:#FAFBFD;position:relative;overflow:hidden;font-family:${FONTS.SANS}">
+  ${hdrStr(pageNum, isEs ? 'Modelo Híbrido' : 'Hybrid Model', st)}
 
-    <div style="font-size:${T.subhead}px;font-weight:800;color:${N};margin-bottom:7px">${isEs ? 'Composicion del modelo' : 'Model composition'}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px">
-      <div style="background:${B};border-radius:4px;padding:9px 10px">
-        <div style="font-size:${T.micro}px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.06em;margin-bottom:3px">${isEs ? 'COMPONENTE 1' : 'COMPONENT 1'}</div>
-        <div style="font-size:${T.body}px;font-weight:700;color:#fff;margin-bottom:2px">${isEs ? 'CPL Base' : 'Base CPL'}</div>
-        <div style="font-size:14px;font-weight:800;color:#fff;line-height:1;margin-bottom:3px">${esc(l.hybridCPLPrice || '€8')}<span style="font-size:${T.small}px;font-weight:400;color:rgba(255,255,255,.7)"> / lead</span></div>
-        <div style="font-size:${T.small}px;color:rgba(255,255,255,.75);line-height:1.4">${isEs ? 'Fee fijo en el momento de la entrega del lead verificado' : 'Fixed fee at the moment of verified lead delivery'}</div>
+  <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
+    ${eyebrowStr(isEs ? 'CPL + CPA' : 'CPL + CPA', ACCENT)}
+    ${titleStr(isEs ? 'Modelo Híbrido — adquisición + conversión' : 'Hybrid Model — acquisition + conversion', N, 22)}
+    <div style="height:12px"></div>
+    ${leadStr(intro, '#3D5166', 11)}
+
+    <!-- two-component split -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">
+      <div style="background:${ACCENT};border-radius:12px;padding:16px 18px;color:#fff;font-family:${FONTS.SANS}">
+        <div style="font-family:${FONTS.MONO};font-size:8.5px;font-weight:600;letter-spacing:0.12em;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:8px">${isEs ? 'Componente 1' : 'Component 1'}</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">${isEs ? 'CPL base reducido' : 'Reduced base CPL'}</div>
+        <div style="font-family:${FONTS.SERIF};font-size:30px;font-weight:600;letter-spacing:-0.025em;line-height:1">${esc(l.hybridCPLPrice || '€8')}<span style="font-family:${FONTS.SANS};font-size:11px;font-weight:400;color:rgba(255,255,255,.7)"> / lead</span></div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,.78);margin-top:8px;line-height:1.45">${isEs ? 'Fee fijo en el momento de la entrega del lead verificado.' : 'Fixed fee at the moment of verified lead delivery.'}</div>
       </div>
-      <div style="background:${N};border-radius:4px;padding:9px 10px">
-        <div style="font-size:${T.micro}px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.06em;margin-bottom:3px">${isEs ? 'COMPONENTE 2' : 'COMPONENT 2'}</div>
-        <div style="font-size:${T.body}px;font-weight:700;color:#fff;margin-bottom:2px">${isEs ? 'Bonus CPA' : 'CPA Bonus'}</div>
-        <div style="font-size:14px;font-weight:800;color:${B};line-height:1;margin-bottom:1px">${esc(l.hybridCPAFee || '€50')}</div>
-        <div style="font-size:${T.small}px;color:rgba(255,255,255,.5);margin-bottom:3px">${isEs ? 'fee fijo al formalizar' : 'fixed fee upon formalization'}</div>
-        <div style="font-size:11px;font-weight:800;color:#90B8FF;line-height:1;margin-bottom:1px">+ ${esc(l.hybridCPAComm || '0.5%')}</div>
-        <div style="font-size:${T.small}px;color:rgba(255,255,255,.5)">${isEs ? 'comision sobre importe' : 'commission on amount'}</div>
+      <div style="background:${N};border-radius:12px;padding:16px 18px;color:#fff;font-family:${FONTS.SANS}">
+        <div style="font-family:${FONTS.MONO};font-size:8.5px;font-weight:600;letter-spacing:0.12em;color:rgba(255,255,255,.65);text-transform:uppercase;margin-bottom:8px">${isEs ? 'Componente 2' : 'Component 2'}</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">${isEs ? 'Bonus CPA al formalizar' : 'CPA bonus on close'}</div>
+        <div style="font-family:${FONTS.SERIF};font-size:30px;font-weight:600;letter-spacing:-0.025em;line-height:1">${esc(l.hybridCPAFee || '€50')}</div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,.65);margin-top:6px">+ <span style="color:${ACCENT};font-weight:600">${esc(l.hybridCPAComm || '0.5%')}</span> ${isEs ? 'sobre importe formalizado' : 'on formalized amount'}</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px">
-      ${calcBoxStr(l.hybridCalcTitle || (isEs ? 'Ejemplo de calculo' : 'Calculation example'), l.hybridCalcText, st)}
-      ${featureBoxStr(isEs ? 'Ventajas del modelo hibrido' : 'Hybrid model advantages', l.hybridFeatures, st)}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+      ${calcBoxStr(l.hybridCalcTitle || (isEs ? 'Ejemplo de cálculo' : 'Calculation example'), l.hybridCalcText, st)}
+      ${featureBoxStr(isEs ? 'Ventajas del modelo híbrido' : 'Hybrid model advantages', l.hybridFeatures || [], st)}
     </div>
 
     ${notesStr(l.hybridNotes, st)}
   </div>
-  ${ftrStr(st)}</div>`;
+
+  ${ftrStr(st)}
+</div>`;
 }

@@ -36,6 +36,44 @@ export function reducer(s, a) {
     case 'LOCALIZE_TEMPLATE':
       return { ...s, ...getTemplateDefaults(a.v), language: a.v };
 
+    // Apply a theme preset (a is the patch object: { brandNavy, brandBlue, … }).
+    case 'LOAD_THEME':
+      return { ...s, ...a.v, activeThemeId: a.id || s.activeThemeId };
+
+    // Generic patch — merge a partial object into state. Useful for org bulk edits.
+    case 'PATCH':
+      return { ...s, ...a.v };
+
+    // Update nested contact card.
+    case 'CONTACT':
+      return { ...s, contact: { ...s.contact, [a.k]: a.v } };
+
+    // Edit/add/remove for metrics, valueProps and closeSteps arrays.
+    case 'METRIC':
+      return { ...s, metrics: s.metrics.map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)) };
+    case 'METRIC_ADD':
+      return { ...s, metrics: [...(s.metrics || []), a.item || { value: '', label: '' }] };
+    case 'METRIC_DEL':
+      return { ...s, metrics: (s.metrics || []).filter((_, i) => i !== a.i) };
+    case 'VALUEPROP':
+      return {
+        ...s,
+        valueProps: s.valueProps.map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)),
+      };
+    case 'VALUEPROP_ADD':
+      return { ...s, valueProps: [...(s.valueProps || []), a.item || { title: '', desc: '' }] };
+    case 'VALUEPROP_DEL':
+      return { ...s, valueProps: (s.valueProps || []).filter((_, i) => i !== a.i) };
+    case 'CLOSESTEP':
+      return {
+        ...s,
+        closeSteps: s.closeSteps.map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)),
+      };
+    case 'CLOSESTEP_ADD':
+      return { ...s, closeSteps: [...(s.closeSteps || []), a.item || { title: '', desc: '' }] };
+    case 'CLOSESTEP_DEL':
+      return { ...s, closeSteps: (s.closeSteps || []).filter((_, i) => i !== a.i) };
+
     // ── Page visibility ─────────────────────────────────────────
     case 'TOGGLE_PAGE': {
       const set = new Set(s.hiddenPages);

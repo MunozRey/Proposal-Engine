@@ -19,7 +19,19 @@
       "Bash(cp temp-vite/eslint.config.js .)",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git remote *)",
+      "Bash(npm test *)",
+      "Bash(curl -sL https://creditchecker.io)",
+      "Bash(grep -oE '#[0-9A-Fa-f]{3,8}')",
+      "Bash(grep -oE 'background[^;}]*[#][0-9A-Fa-f]{3,8}[^;}]*')",
+      "Bash(curl -sL https://creditchecker.io/_nuxt/entry.DtK_2SVk.css)",
+      "Bash(curl -sLo public/fonts/Larken-Regular.otf https://creditchecker.io/_nuxt/fonnts.com-Larken_Regular.CvnE_tds.otf)",
+      "Bash(curl -sLo public/fonts/Larken-Medium.otf https://creditchecker.io/_nuxt/fonnts.com-Larken_Medium.CFygHqa5.otf)",
+      "Bash(curl -sLo public/fonts/Larken-Bold.otf https://creditchecker.io/_nuxt/fonnts.com-Larken_Bold.kL5mNd1o.otf)",
+      "Bash(git add *)"
     ]
   }
 }
