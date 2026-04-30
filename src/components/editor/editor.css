@@ -88,15 +88,10 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--ed-navy) 0%, #15305a 100%);
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-family: var(--ed-font-display);
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: -0.02em;
+  display: block;
+  flex-shrink: 0;
   box-shadow: var(--ed-shadow-sm);
+  /* The SVG already has its own navy background, so we don't override it. */
 }
 .ed-topbar-title {
   display: flex;

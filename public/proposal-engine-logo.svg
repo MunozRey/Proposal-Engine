@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Proposal Engine">
+  <!-- Brand-navy rounded background -->
+  <rect width="64" height="64" rx="14" fill="#0A1264"/>
+
+  <!-- Document body (white) with the top-right folded corner cut out -->
+  <path fill="#FFFFFF" d="M16 14 H38 L50 26 V50 H16 Z"/>
+
+  <!-- Folded-corner triangle in brand yellow -->
+  <path fill="#FFCC00" d="M38 14 V26 H50 Z"/>
+
+  <!-- Inner content lines (navy on white) suggest a written proposal -->
+  <rect x="21" y="33" width="22" height="3" rx="1.5" fill="#0A1264"/>
+  <rect x="21" y="40" width="16" height="3" rx="1.5" fill="#0A1264"/>
+</svg>

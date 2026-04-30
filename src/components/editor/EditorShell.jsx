@@ -109,7 +109,13 @@ export function EditorShell({
     >
       <div className="ed-topbar">
         <div className="ed-topbar-brand">
-          <div className="ed-topbar-logo">CC</div>
+          <img
+            className="ed-topbar-logo"
+            src="/proposal-engine-logo.svg"
+            alt="Proposal Engine"
+            width="28"
+            height="28"
+          />
           <div className="ed-topbar-title">
             <span className="ed-app-name">{appTitle}</span>
             <span className="ed-app-tag">
