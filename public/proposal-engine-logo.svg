@@ -1,14 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Proposal Engine">
-  <!-- Brand-navy rounded base -->
-  <rect width="64" height="64" rx="14" fill="#0A1264"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 49" fill="none" role="img" aria-label="CreditCheck">
+  <!-- Inner check/arrow in brand blue -->
+  <path d="M43.8338 24.4204V14.6363L21.9028 27.0223L10.6139 20.5058V30.3789L21.9028 36.8954L43.8338 24.4204Z" fill="#1858F5"/>
 
-  <!-- Solid sans-serif P silhouette (stem + bowl drawn as a single closed
-       path). No serifs, no extra strokes — the strong silhouette carries
-       the mark from a 16px favicon up to large hero placements. -->
-  <path fill="#FFFFFF" d="M14 12 H24 A12 12 0 0 1 24 36 V52 H14 Z"/>
-
-  <!-- Brand-yellow counter (the inside of the P bowl). Filling the
-       negative space with the brand accent locks one confident colour
-       into the heart of the mark. -->
-  <path fill="#FFCC00" d="M24 20 A4 4 0 0 1 24 28 Z"/>
+  <!-- Outer C frame (3 facets) in brand navy -->
+  <path d="M8.26045 31.7994V16.535L20.7402 9.48873V0L0 11.7109V36.6235L20.7402 48.3344V38.8457L8.26045 31.7994Z" fill="#0A1264"/>
+  <path d="M35.5734 16.535L43.8338 11.7109L23.0936 0V9.48873L35.5734 16.535Z" fill="#0A1264"/>
+  <path d="M35.5734 31.7994L23.0936 38.8457V48.3344L43.8338 36.6235L35.5734 31.7994Z" fill="#0A1264"/>
 </svg>

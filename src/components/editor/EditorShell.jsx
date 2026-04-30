@@ -112,8 +112,7 @@ export function EditorShell({
           <img
             className="ed-topbar-logo"
             src="/proposal-engine-logo.svg"
-            alt="Proposal Engine"
-            width="28"
+            alt="CreditCheck"
             height="28"
           />
           <div className="ed-topbar-title">

@@ -85,13 +85,12 @@
   flex-shrink: 0;
 }
 .ed-topbar-logo {
-  width: 28px;
   height: 28px;
-  border-radius: 8px;
+  width: auto;
   display: block;
   flex-shrink: 0;
-  box-shadow: var(--ed-shadow-sm);
-  /* The SVG already has its own navy background, so we don't override it. */
+  /* The SVG is the CreditCheck mark on transparent — no background, no
+     border-radius. It keeps its natural 44:49 aspect ratio. */
 }
 .ed-topbar-title {
   display: flex;
