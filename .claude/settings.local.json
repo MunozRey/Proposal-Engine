@@ -38,7 +38,9 @@
       "Bash(npx vitest *)",
       "Bash(npx vite *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(curl -s \"http://localhost:3131/proposal-engine-logo.svg\")",
+      "mcp__Claude_in_Chrome__tabs_context_mcp"
     ]
   }
 }

@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Proposal Engine">
-  <!-- Brand-navy rounded background -->
+  <!-- Brand-navy rounded base -->
   <rect width="64" height="64" rx="14" fill="#0A1264"/>
 
-  <!-- Document body (white) with the top-right folded corner cut out -->
-  <path fill="#FFFFFF" d="M16 14 H38 L50 26 V50 H16 Z"/>
+  <!-- Solid sans-serif P silhouette (stem + bowl drawn as a single closed
+       path). No serifs, no extra strokes — the strong silhouette carries
+       the mark from a 16px favicon up to large hero placements. -->
+  <path fill="#FFFFFF" d="M14 12 H24 A12 12 0 0 1 24 36 V52 H14 Z"/>
 
-  <!-- Folded-corner triangle in brand yellow -->
-  <path fill="#FFCC00" d="M38 14 V26 H50 Z"/>
-
-  <!-- Inner content lines (navy on white) suggest a written proposal -->
-  <rect x="21" y="33" width="22" height="3" rx="1.5" fill="#0A1264"/>
-  <rect x="21" y="40" width="16" height="3" rx="1.5" fill="#0A1264"/>
+  <!-- Brand-yellow counter (the inside of the P bowl). Filling the
+       negative space with the brand accent locks one confident colour
+       into the heart of the mark. -->
+  <path fill="#FFCC00" d="M24 20 A4 4 0 0 1 24 28 Z"/>
 </svg>
