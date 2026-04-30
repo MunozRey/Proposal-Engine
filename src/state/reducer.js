@@ -1,5 +1,6 @@
 import { INIT } from './initialState.js';
 import { getTemplateDefaults } from './templateDefaults.js';
+import { enforceCreditcheckBrand } from '../design/brandLock.js';
 
 /**
  * Actions use shorthand keys for compactness:
@@ -22,27 +23,46 @@ import { getTemplateDefaults } from './templateDefaults.js';
  * @returns {import('./initialState.js').AppState} New state
  */
 export function reducer(s, a) {
+  if (
+    a?.t === 'SET' &&
+    [
+      'brandNavy',
+      'brandBlue',
+      'brandAccent',
+      'fontDisplay',
+      'fontBody',
+      'fontMono',
+      'activeThemeId',
+      'ccLogoUrl',
+    ].includes(a.k)
+  ) {
+    return s;
+  }
   switch (a.t) {
     // ── Generic ─────────────────────────────────────────────────
     case 'SET':
       return { ...s, [a.k]: a.v };
 
     case 'RESET':
-      return { ...INIT, ...getTemplateDefaults(s.language || 'en'), language: s.language || 'en' };
+      return enforceCreditcheckBrand({
+        ...INIT,
+        ...getTemplateDefaults(s.language || 'en'),
+        language: s.language || 'en',
+      });
 
     case 'LOAD':
-      return { ...INIT, ...a.v };
+      return enforceCreditcheckBrand({ ...INIT, ...a.v });
 
     case 'LOCALIZE_TEMPLATE':
-      return { ...s, ...getTemplateDefaults(a.v), language: a.v };
+      return enforceCreditcheckBrand({ ...s, ...getTemplateDefaults(a.v), language: a.v });
 
     // Apply a theme preset (a is the patch object: { brandNavy, brandBlue, … }).
     case 'LOAD_THEME':
-      return { ...s, ...a.v, activeThemeId: a.id || s.activeThemeId };
+      return enforceCreditcheckBrand(s);
 
     // Generic patch — merge a partial object into state. Useful for org bulk edits.
     case 'PATCH':
-      return { ...s, ...a.v };
+      return enforceCreditcheckBrand({ ...s, ...a.v });
 
     // Update nested contact card.
     case 'CONTACT':
@@ -106,6 +126,19 @@ export function reducer(s, a) {
     case 'FEAT_DEL':
       return { ...s, [a.side]: s[a.side].filter((_, i) => i !== a.i) };
     case 'PLAN':
+      if (a.f === 'rec') {
+        // Only one recommended plan is allowed at a time.
+        if (a.v) {
+          return {
+            ...s,
+            plans: s.plans.map((x, idx) => ({ ...x, rec: idx === a.i })),
+          };
+        }
+        return {
+          ...s,
+          plans: s.plans.map((x, idx) => (idx === a.i ? { ...x, rec: false } : x)),
+        };
+      }
       return { ...s, plans: s.plans.map((x, i) => (i === a.i ? { ...x, [a.f]: a.v } : x)) };
 
     // ── Leads — simple fields ───────────────────────────────────

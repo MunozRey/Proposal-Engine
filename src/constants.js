@@ -2,9 +2,9 @@
    Brand & PDF Page Colors
    ══════════════════════════════════════════════════ */
 
-// Primary brand
-export const NAVY = '#0B1D3A';
-export const BLUE = '#1858F5';
+// Primary brand (CreditCheck official)
+export const NAVY = '#0A1264';
+export const BLUE = '#005EFF';
 
 // Page backgrounds & borders
 export const GREY = '#F0F2F5';

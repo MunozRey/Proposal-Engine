@@ -19,7 +19,7 @@ import {
 const ACCENT = '#22D3A0';
 
 export function genLeadsCPA(st, pageNum = '03') {
-  const { N } = getColors(st);
+  const { N, A } = getColors(st);
   const isEs = st.language === 'es';
   const l = st.leads || {};
 
@@ -38,11 +38,11 @@ export function genLeadsCPA(st, pageNum = '03') {
     (l.cpaTramos || []).map((row) => [
       { html: `<span style="font-weight:500;color:#3D5166">${esc(row.importe)}</span>` },
       {
-        html: `<span style="display:inline-block;background:${N};color:#fff;font-family:${FONTS.MONO};font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px">${esc(row.fee)}</span>`,
+        html: `<span style="display:inline-block;background:${A};color:${N};font-family:${FONTS.MONO};font-size:12px;font-weight:800;padding:3px 10px;border-radius:6px">${esc(row.fee)}</span>`,
         style: 'text-align:center',
       },
       {
-        html: `<span style="color:#6B7B92">+ ${esc(l.cpaCommission || '1.5%')} ${isEs ? 'sobre' : 'on'} ${esc(l.cpaCommissionBase || (isEs ? 'importe' : 'amount'))}</span>`,
+        html: `<span style="color:#30465F;font-weight:600">+ ${esc(l.cpaCommission || '1.5%')} ${isEs ? 'sobre' : 'on'} ${esc(l.cpaCommissionBase || (isEs ? 'importe' : 'amount'))}</span>`,
         style: 'text-align:center',
       },
     ]),

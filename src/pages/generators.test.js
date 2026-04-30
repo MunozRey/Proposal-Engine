@@ -8,7 +8,6 @@ import { genPage1 } from './genPage1.js';
 import { genPage2 } from './genPage2.js';
 import { genPage3 } from './genPage3.js';
 import { genWhyCC } from './genWhyCC.js';
-import { genClose } from './genClose.js';
 import { genLeadsOverview } from './leads/genLeadsOverview.js';
 import { genLeadsCPL } from './leads/genLeadsCPL.js';
 import { genLeadsCPA } from './leads/genLeadsCPA.js';
@@ -19,7 +18,6 @@ const PAGES = {
   howItWorks: () => genPage2(INIT, '01'),
   pricing: () => genPage3(INIT, '02'),
   whyCC: () => genWhyCC(INIT, '03'),
-  close: () => genClose(INIT, '99'),
   leadsOverview: () => genLeadsOverview(INIT, '01'),
   leadsCPL: () => genLeadsCPL(INIT, '02'),
   leadsCPA: () => genLeadsCPA(INIT, '03'),
@@ -45,8 +43,8 @@ describe('page generators (smoke)', () => {
   it('cover honors the language toggle', () => {
     const en = genPage1({ ...INIT, language: 'en' });
     const es = genPage1({ ...INIT, language: 'es' });
-    expect(en).toContain('CONFIDENTIAL');
-    expect(es).toContain('CONFIDENCIAL');
+    expect(en).toContain('Date');
+    expect(es).toContain('Fecha');
   });
 
   it('pricing reflects custom plans', () => {
@@ -78,17 +76,6 @@ describe('page generators (smoke)', () => {
     expect(html).toContain('€2');
     // Recommended pill should appear at least once
     expect(html.toLowerCase()).toMatch(/most popular|recomendado/);
-  });
-
-  it('close page builds a mailto CTA with the contact email', () => {
-    const st = {
-      ...INIT,
-      contact: { ...INIT.contact, email: 'sales@x.io' },
-      clientName: 'Ebury',
-    };
-    const html = genClose(st, '99');
-    expect(html).toContain('mailto:sales');
-    expect(html).toContain('Ebury');
   });
 
   it('leads overview surfaces all three model accents', () => {

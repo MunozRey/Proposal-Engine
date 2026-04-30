@@ -64,20 +64,20 @@ export function genWhyCC(st, pageNum = '03') {
       (p) => `
     <div style="background:#fff;border:1px solid #E6ECF3;border-radius:10px;padding:14px 16px;font-family:${FONTS.SANS}">
       <div style="font-family:${FONTS.SERIF};font-size:14px;font-weight:600;color:${N};letter-spacing:-0.01em;margin-bottom:6px">${esc(p.title)}</div>
-      <div style="font-size:10px;color:#3D5166;line-height:1.55">${esc(p.desc)}</div>
+      <div style="font-size:10px;color:#30465F;line-height:1.55">${esc(p.desc)}</div>
     </div>`
     )
     .join('');
 
   return `
-<div style="width:595px;height:842px;background:#FAFBFD;position:relative;overflow:hidden;font-family:${FONTS.SANS}">
+<div style="width:595px;height:842px;background:linear-gradient(180deg, #FAFCFF 0%, #F5F8FF 100%);position:relative;overflow:hidden;font-family:${FONTS.SANS}">
   ${hdrStr(pageNum, isEs ? 'Por qué CreditCheck' : 'Why CreditCheck', st)}
 
   <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
     ${eyebrowStr(isEs ? 'Por qué CreditCheck' : 'Why CreditCheck')}
     ${titleStr(isEs ? 'La infraestructura de las decisiones de crédito' : 'The infrastructure behind credit decisions', N, 22)}
     <div style="height:12px"></div>
-    ${leadStr(intro, '#3D5166', 11)}
+    ${leadStr(intro, '#30465F', 11)}
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 32px;margin-top:28px">
       ${metricsHtml}

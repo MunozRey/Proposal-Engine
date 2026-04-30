@@ -35,15 +35,15 @@ const DEFAULTS = Object.freeze({
 
 export function tokens(st = {}) {
   const brand = {
-    navy: st.brandNavy || DEFAULTS.brand.navy,
-    blue: st.brandBlue || DEFAULTS.brand.blue,
-    accent: st.brandAccent || DEFAULTS.brand.accent,
+    navy: DEFAULTS.brand.navy,
+    blue: DEFAULTS.brand.blue,
+    accent: DEFAULTS.brand.accent,
   };
 
   const family = {
-    display: st.fontDisplay || DEFAULTS.typo.family.display,
-    body: st.fontBody || DEFAULTS.typo.family.body,
-    mono: st.fontMono || DEFAULTS.typo.family.mono,
+    display: DEFAULTS.typo.family.display,
+    body: DEFAULTS.typo.family.body,
+    mono: DEFAULTS.typo.family.mono,
   };
 
   // st.typo is the legacy size config (kept for backwards-compat with stored proposals)

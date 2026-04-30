@@ -53,13 +53,26 @@ export function EditorShell({
   autoFit,
   onFit,
   onExport,
+  onExportHtml,
+  onExportDocx,
+  onPrint,
   exporting,
+  exportingHtml,
+  exportingDocx,
   exportLabel,
+  exportHtmlLabel,
+  exportDocxLabel,
+  printLabel,
   hasUnsavedChanges,
   onReset,
   resetLabel,
   generatingLabel,
+  generatingHtmlLabel,
+  generatingDocxLabel,
   ctrlEHint,
+  ctrlShiftEHint,
+  ctrlAltEHint,
+  ctrlPHint,
   totalFields,
   completedFields,
   // Collapse
@@ -68,6 +81,12 @@ export function EditorShell({
   width,
   // Locale
   searchPlaceholder,
+  undoTitle,
+  redoTitle,
+  shortcutsTitle,
+  languageTitle,
+  collapseTitle,
+  fitLabel,
 }) {
   const cmdHint = formatCombo('mod+k');
   const localeMenuRef = useRef(null);
@@ -96,33 +115,34 @@ export function EditorShell({
           <SaveIndicator status={saveStatus} label={saveLabel} />
           <IconButton
             iconName="undo"
-            title={`Undo ${formatCombo('mod+z')}`}
+            title={`${undoTitle} ${formatCombo('mod+z')}`}
             onClick={onUndo}
             disabled={!canUndo}
             size={14}
           />
           <IconButton
             iconName="redo"
-            title={`Redo ${formatCombo('mod+shift+z')}`}
+            title={`${redoTitle} ${formatCombo('mod+shift+z')}`}
             onClick={onRedo}
             disabled={!canRedo}
             size={14}
           />
           <IconButton
             iconName="key"
-            title={`Shortcuts ${formatCombo('mod+/')}`}
+            title={`${shortcutsTitle} ${formatCombo('mod+/')}`}
             onClick={onShortcuts}
             size={14}
           />
           <div style={{ position: 'relative' }} ref={localeMenuRef}>
             <IconButton
               iconName="globe"
-              title="Language"
+              title={languageTitle}
               onClick={() => (onSettings ? onSettings() : setLocaleMenuOpen((v) => !v))}
               size={14}
+              data-locale-trigger="true"
             />
           </div>
-          <IconButton iconName="panelLeft" title="Collapse panel" onClick={onCollapse} size={14} />
+          <IconButton iconName="panelLeft" title={collapseTitle} onClick={onCollapse} size={14} />
         </div>
       </div>
 
@@ -197,25 +217,49 @@ export function EditorShell({
             className={`ed-fit-btn${autoFit ? ' ed-active' : ''}`}
             onClick={onFit}
           >
-            Fit
+            {fitLabel}
           </button>
         </div>
-        <button
-          type="button"
-          className={`ed-export-btn${hasUnsavedChanges ? ' ed-has-changes' : ''}`}
-          disabled={exporting}
-          onClick={onExport}
-        >
-          <span
-            dangerouslySetInnerHTML={{
-              __html: svgIcon('download', { size: 16, color: '#fff' }),
-            }}
-          />
-          {exporting ? generatingLabel : exportLabel}
-        </button>
+        <div className="ed-export-grid">
+          <button
+            type="button"
+            className={`ed-export-btn${hasUnsavedChanges ? ' ed-has-changes' : ''}`}
+            disabled={exporting}
+            onClick={onExport}
+          >
+            <span
+              dangerouslySetInnerHTML={{
+                __html: svgIcon('download', { size: 16, color: '#fff' }),
+              }}
+            />
+            {exporting ? generatingLabel : exportLabel}
+          </button>
+          <button
+            type="button"
+            className="ed-export-btn ed-export-btn-alt"
+            disabled={exportingHtml}
+            onClick={onExportHtml}
+          >
+            {exportingHtml ? generatingHtmlLabel : exportHtmlLabel}
+          </button>
+          <button
+            type="button"
+            className="ed-export-btn ed-export-btn-alt"
+            disabled={exportingDocx}
+            onClick={onExportDocx}
+          >
+            {exportingDocx ? generatingDocxLabel : exportDocxLabel}
+          </button>
+          <button type="button" className="ed-export-btn ed-export-btn-alt" onClick={onPrint}>
+            {printLabel}
+          </button>
+        </div>
         <div className="ed-bottombar-meta">
           <span>
-            <span className="ed-kbd">{formatCombo('mod+e')}</span> {ctrlEHint}
+            <span className="ed-kbd">{formatCombo('mod+e')}</span> {ctrlEHint} ·{' '}
+            <span className="ed-kbd">{formatCombo('mod+shift+e')}</span> {ctrlShiftEHint} ·{' '}
+            <span className="ed-kbd">{formatCombo('mod+alt+e')}</span> {ctrlAltEHint} ·{' '}
+            <span className="ed-kbd">{formatCombo('mod+p')}</span> {ctrlPHint}
           </span>
           <button
             type="button"
@@ -248,7 +292,7 @@ function LocaleMenu({ open, onClose, lang, onLangChange }) {
       if (e.key === 'Escape') onClose();
     };
     const onClick = (e) => {
-      if (!e.target.closest('.ed-menu') && !e.target.closest('[title="Language"]')) {
+      if (!e.target.closest('.ed-menu') && !e.target.closest('[data-locale-trigger="true"]')) {
         onClose();
       }
     };
@@ -262,7 +306,7 @@ function LocaleMenu({ open, onClose, lang, onLangChange }) {
 
   if (!open) return null;
   return (
-    <div className="ed-menu" style={{ top: 50, right: 12, minWidth: 200 }}>
+    <div className="ed-menu" style={{ top: 50, right: 12, minWidth: 200 }} data-locale-menu="true">
       {listLocales().map((loc) => (
         <button
           key={loc.code}

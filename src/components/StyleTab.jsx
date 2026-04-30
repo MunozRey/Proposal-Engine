@@ -1,52 +1,4 @@
-import { NAVY, BLUE } from '../constants.js';
-
-function ColorField({ label, value, fallback, onChange, resetLabel }) {
-  const active = value || fallback;
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-      <input
-        type="color"
-        value={active}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: '28px',
-          height: '28px',
-          border: '1.5px solid var(--border)',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          padding: '1px',
-        }}
-      />
-      <div style={{ flex: 1 }}>
-        <div className="field-label" style={{ marginBottom: '1px' }}>
-          {label}
-        </div>
-        <div style={{ fontSize: '10px', color: 'var(--t-muted)', fontFamily: 'monospace' }}>
-          {active}
-        </div>
-      </div>
-      {value && (
-        <button
-          onClick={() => onChange('')}
-          title={resetLabel}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '10px',
-            color: 'var(--t-muted)',
-            cursor: 'pointer',
-            padding: '2px 4px',
-          }}
-        >
-          ↺
-        </button>
-      )}
-    </div>
-  );
-}
-
 export function StyleTab({ st, dispatch, allPages, t }) {
-  const isEs = st.language === 'es';
   const hidden = new Set(st.hiddenPages || []);
 
   return (
@@ -93,35 +45,6 @@ export function StyleTab({ st, dispatch, allPages, t }) {
         ))}
       </div>
 
-      {/* ── Brand Colors ─────────────────────────────── */}
-      <div className="section-title">
-        <span>{t('shared.brandColors')}</span>
-      </div>
-      <p
-        style={{
-          fontSize: '10px',
-          color: 'var(--t-muted)',
-          marginBottom: '10px',
-          lineHeight: '1.5',
-        }}
-      >
-        {t('shared.brandColorsHint')}
-      </p>
-      <ColorField
-        label={isEs ? 'Color principal (navy)' : 'Primary color (navy)'}
-        value={st.brandNavy}
-        fallback={NAVY}
-        resetLabel={t('shared.restoreDefault')}
-        onChange={(v) => dispatch({ t: 'SET', k: 'brandNavy', v })}
-      />
-      <ColorField
-        label={isEs ? 'Color acento (azul)' : 'Accent color (blue)'}
-        value={st.brandBlue}
-        fallback={BLUE}
-        resetLabel={t('shared.restoreDefault')}
-        onChange={(v) => dispatch({ t: 'SET', k: 'brandBlue', v })}
-      />
-
       {/* ── Footer ────────────────────────────────────── */}
       <div className="section-title">
         <span>{t('shared.footer')}</span>
@@ -142,21 +65,6 @@ export function StyleTab({ st, dispatch, allPages, t }) {
           onChange={(e) => dispatch({ t: 'SET', k: 'footerRight', v: e.target.value })}
         />
       </div>
-
-      {/* ── Reset ─────────────────────────────────────── */}
-      <div className="section-title" style={{ marginTop: '16px' }}>
-        <span>{t('shared.resetSection')}</span>
-      </div>
-      <button
-        className="btn-add"
-        style={{ marginTop: '4px' }}
-        onClick={() => {
-          dispatch({ t: 'SET', k: 'brandNavy', v: '' });
-          dispatch({ t: 'SET', k: 'brandBlue', v: '' });
-        }}
-      >
-        ↺ {t('shared.restoreDefaults')}
-      </button>
     </div>
   );
 }

@@ -17,11 +17,11 @@ const MONO = '"IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace';
  * Defaults follow the official creditchecker.io palette unless the user
  * has overridden them via state (st.brandNavy / st.brandBlue / st.brandAccent).
  */
-export function getColors(st) {
+export function getColors() {
   return {
-    N: st?.brandNavy || NAVY,
-    B: st?.brandBlue || BLUE,
-    A: st?.brandAccent || '#FFCC00',
+    N: NAVY,
+    B: BLUE,
+    A: '#FFCC00',
   };
 }
 
@@ -32,22 +32,18 @@ export function getColors(st) {
 // (their custom upload is typically white/transparent and would disappear on light).
 export function logoStr(key, h, st, mode = 'dark') {
   if (key === 'ccLogoUrl') {
-    if (mode === 'dark' && st.ccLogoUrl) {
-      const w = h * (193 / 49);
-      return `<img src="${st.ccLogoUrl}" style="height:${h}px;width:${w}px;object-fit:contain;display:block" crossorigin="anonymous">`;
-    }
-    const color = mode === 'dark' ? '#FFFFFF' : st.brandNavy || NAVY;
+    const color = mode === 'dark' ? '#FFFFFF' : NAVY;
     return ccLogoSvg({ color, height: h });
   }
   if (st[key])
     return `<img src="${st[key]}" style="height:${h}px;object-fit:contain;display:block">`;
-  const textColor = mode === 'dark' ? '#fff' : st.brandNavy || NAVY;
+  const textColor = mode === 'dark' ? '#fff' : NAVY;
   return `<span style="font-size:${h * 0.62}px;font-weight:700;color:${textColor};font-family:${SERIF};letter-spacing:-0.01em">${esc(st.clientName || '')}</span>`;
 }
 
 // Just the geometric mark (no wordmark). Useful for compact placements.
-export function logoMark(h, st, mode = 'light') {
-  const color = mode === 'dark' ? '#FFFFFF' : st.brandNavy || NAVY;
+export function logoMark(h, _st, mode = 'light') {
+  const color = mode === 'dark' ? '#FFFFFF' : NAVY;
   return ccMarkSvg({ color, size: h });
 }
 
@@ -68,10 +64,10 @@ export function hdrStr(num, lbl, st, mode = 'light') {
 }
 
 /* ── Footer (3-cell, mono micro) ──────────────────────────── */
-export function ftrStr(st) {
-  const left = st?.footerLeft || 'CreditCheck · Confidential';
-  const right = st?.footerRight || 'creditchecker.io';
-  const center = st?.footerCenter || '';
+export function ftrStr() {
+  const left = 'CreditCheck · Confidential';
+  const right = 'creditchecker.io';
+  const center = '';
   return `
   <div style="position:absolute;bottom:0;left:22px;right:22px;height:24px;border-top:.5px solid #E6ECF3;display:flex;align-items:center;justify-content:space-between;font-family:${MONO};font-size:7px;color:#94A3B8;letter-spacing:0.04em">
     <span>${esc(left)}</span>
@@ -156,7 +152,7 @@ export function featureBoxStr(title, features, st) {
 
 /* ── Calc card (mono numbers, clean layout) ─────────────── */
 export function calcBoxStr(title, text, st) {
-  const { N, B } = getColors(st);
+  const { N } = getColors(st);
   const lines = (text || '')
     .split('\n')
     .map((raw) => {
@@ -170,8 +166,8 @@ export function calcBoxStr(title, text, st) {
       const right = m ? m[2] : '';
       return `
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:3px 0;${isTotal ? `margin-top:6px;border-top:.5px solid rgba(255,255,255,.18);padding-top:7px` : ''};padding-left:${indent}px">
-        <span style="font-family:${SANS};font-size:9px;color:${isTotal ? '#fff' : 'rgba(255,255,255,.72)'};font-weight:${isTotal ? '600' : '400'}">${esc(left)}</span>
-        <span style="font-family:${MONO};font-size:${isTotal ? '12' : '9'}px;color:${isTotal ? B : '#fff'};font-weight:${isTotal ? '700' : '500'};font-variant-numeric:tabular-nums">${esc(right)}</span>
+        <span style="font-family:${SANS};font-size:9.5px;color:#FFFFFF;font-weight:${isTotal ? '700' : '600'}">${esc(left)}</span>
+        <span style="font-family:${MONO};font-size:${isTotal ? '12.5' : '10'}px;color:#FFFFFF;font-weight:${isTotal ? '800' : '700'};font-variant-numeric:tabular-nums">${esc(right)}</span>
       </div>`;
     })
     .join('');

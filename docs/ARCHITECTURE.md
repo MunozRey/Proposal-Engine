@@ -17,18 +17,17 @@ modules.
 │  src/utils/history.js        undo / redo wrapper            │
 └────────────────────────────┬────────────────────────────────┘
                              │
-            ┌────────────────┼────────────────┐
-            ▼                ▼                ▼
-┌────────────────┐  ┌──────────────────┐  ┌─────────────────┐
-│  Preview (UI)  │  │ Page generators  │  │  PDF export     │
-│  (React tree)  │  │  src/pages/*.js  │  │  exportPdf.js   │
-│   uses st      │  │  return HTML str │  │  raster @ 4x    │
-│   directly     │  │  consumed by     │  │  → jsPDF + png  │
-└──────┬─────────┘  │  both branches   │  └─────────────────┘
-       │            └────────┬─────────┘
-       │                     │
+            ┌────────────────┼───────────────────────┐
+            ▼                ▼                       ▼
+┌────────────────┐  ┌──────────────────┐   ┌───────────────────────────────┐
+│  Preview (UI)  │  │ Page generators  │   │ Export pipelines              │
+│  (React tree)  │  │  src/pages/*.js  │   │ src/utils/exportPdf.js        │
+│   uses st      │  │  return HTML str │   │ src/utils/exportHtml.js       │
+│   directly     │  │  consumed by all │   │ src/utils/exportDocx.js       │
+└──────┬─────────┘  └────────┬─────────┘   │ + print stylesheet in App.css │
+       │                     │             └───────────────────────────────┘
        └─── PageCard.jsx ◀───┘
-              renders the HTML in a scaled iframe-less div
+             renders the HTML in a scaled iframe-less div
 ```
 
 The **same HTML strings** are reused for both the on-screen preview
@@ -118,7 +117,7 @@ metric, notes).
 `App.jsx` composes the active set per `proposalType` (`wl`, `leads`,
 `combo`) and respects `hiddenPages` for visibility toggles.
 
-## PDF export pipeline
+## Export pipelines
 
 `src/utils/exportPdf.js` rasterises each page at **4x scale** and
 emits PNG into a jsPDF document.
@@ -135,8 +134,11 @@ shrink. The current raster path was upgraded to:
   capture (so Inter / IBM Plex Sans / serif Larken-fallbacks actually
   render).
 
-The vector path is tracked as a future workstream (see
-`docs/CHANGELOG.md` "Unreleased").
+Additional export modules:
+
+- `src/utils/exportHtml.js`: creates a self-contained HTML file that mirrors preview pages and includes print-ready CSS.
+- `src/utils/exportDocx.js`: generates a DOCX file with proposal sections extracted from page content.
+- `src/App.css` `@media print`: provides print pagination and A4 output behavior.
 
 ## Editor shell
 
@@ -175,7 +177,7 @@ See [`docs/I18N.md`](./I18N.md) for how to add a language.
 ## Verification
 
 - `npm run lint` — ESLint, react-hooks, no warnings allowed in CI.
-- `npm test` — vitest unit suite (currently 84 tests across 7 files).
+- `npm test` — vitest unit suite.
 - `npm run check` — lint + test + build.
 - Manual: open `http://localhost:3131`, switch proposal types,
   language, theme; click Export PDF, inspect the file.

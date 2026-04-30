@@ -6,37 +6,6 @@ export function LeadsContentTab({ st, dispatch }) {
   return (
     <div>
       <div className="section-title">
-        <span>{isEs ? 'Portada' : 'Cover'}</span>
-      </div>
-      <div className="field">
-        <div className="field-label">{isEs ? 'Etiqueta superior' : 'Badge label'}</div>
-        <input
-          type="text"
-          value={st.coverBadge}
-          placeholder={isEs ? 'PROPUESTA DE COLABORACION' : 'PARTNERSHIP PROPOSAL'}
-          onChange={(e) => dispatch({ t: 'SET', k: 'coverBadge', v: e.target.value })}
-        />
-      </div>
-      <div className="field">
-        <div className="field-label">{isEs ? 'Linea 1 (blanco)' : 'Line 1 (white)'}</div>
-        <input
-          type="text"
-          value={st.coverLine1}
-          placeholder={isEs ? 'Propuesta para' : 'Proposal for'}
-          onChange={(e) => dispatch({ t: 'SET', k: 'coverLine1', v: e.target.value })}
-        />
-      </div>
-      <div className="field">
-        <div className="field-label">{isEs ? 'Producto (azul)' : 'Product (blue)'}</div>
-        <input
-          type="text"
-          value={st.productTitle}
-          placeholder={isEs ? 'generación de leads verificados' : 'verified lead generation'}
-          onChange={(e) => dispatch({ t: 'SET', k: 'productTitle', v: e.target.value })}
-        />
-      </div>
-
-      <div className="section-title">
         <span>{isEs ? 'Pag. 2 — Resumen' : 'Pg. 2 — Overview'}</span>
       </div>
       <div className="field">

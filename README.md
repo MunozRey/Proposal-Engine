@@ -7,26 +7,27 @@
 
 Internal SaaS for the **CreditCheck** team to author commercial proposals
 (White-Label, Leads — CPL/CPA/Hybrid — and Combo) with a real-time preview
-and a one-click PDF export. Aligned with the [creditchecker.io](https://creditchecker.io)
-brand: deep navy, electric blue, EU-yellow accent, IBM Plex Sans body, Larken/IBM Plex Serif display.
+and multi-format exports (PDF, HTML, DOCX, and print-ready output).
+Aligned with the [creditchecker.io](https://creditchecker.io) brand.
 
-|                  |                                                                     |
-| ---------------- | ------------------------------------------------------------------- |
-| **Localised in** | English · Castellano · Português · Français · Deutsch · Italiano    |
-| **Themes**       | CreditCheck (official) · Corporate Navy · Modern Mint · Bold Dark   |
-| **Output**       | A4 vector-friendly PDF (Inter / IBM Plex embedded via Google Fonts) |
-| **Persistence**  | localStorage with debounced autosave + JSON import/export           |
+|                  |                                                                   |
+| ---------------- | ----------------------------------------------------------------- |
+| **Localized in** | English · Spanish · Portuguese · French · German · Italian        |
+| **Themes**       | CreditCheck (official) · Corporate Navy · Modern Mint · Bold Dark |
+| **Output**       | A4 PDF · self-contained HTML · DOCX · print stylesheet            |
+| **Persistence**  | localStorage with debounced autosave + JSON import/export         |
 
 ## Documentation
 
-- 🇬🇧 English — [`README.en.md`](./README.en.md)
-- 🇪🇸 Castellano — [`README.es.md`](./README.es.md)
-- 🏗 Architecture — [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
-- 🎨 Design system — [`docs/DESIGN-SYSTEM.md`](./docs/DESIGN-SYSTEM.md)
-- 🌍 Internationalisation — [`docs/I18N.md`](./docs/I18N.md)
-- 🤝 Contributing — [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
-- 🚀 Deployment — [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
-- 📜 Changelog — [`docs/CHANGELOG.md`](./docs/CHANGELOG.md)
+- Main README (English) — [`README.md`](./README.md)
+- Legacy alternate README (now English) — [`README.es.md`](./README.es.md)
+- Architecture — [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- Design system — [`docs/DESIGN-SYSTEM.md`](./docs/DESIGN-SYSTEM.md)
+- Internationalization — [`docs/I18N.md`](./docs/I18N.md)
+- Contributing — [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
+- Deployment — [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
+- Changelog — [`docs/CHANGELOG.md`](./docs/CHANGELOG.md)
+- Verification checklist — [`docs/VERIFICATION-CHECKLIST.md`](./docs/VERIFICATION-CHECKLIST.md)
 
 ## Quickstart
 

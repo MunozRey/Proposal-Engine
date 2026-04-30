@@ -45,14 +45,14 @@ export function genClose(st, pageNum = '99') {
       <div style="width:26px;height:26px;border-radius:50%;background:${B}14;color:${B};font-family:${FONTS.MONO};font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">${String(i + 1).padStart(2, '0')}</div>
       <div style="flex:1;min-width:0">
         <div style="font-family:${FONTS.SERIF};font-size:14px;font-weight:600;color:${N};letter-spacing:-0.005em;line-height:1.2">${esc(s.title)}</div>
-        <div style="font-size:10px;color:#3D5166;line-height:1.5;margin-top:3px">${esc(s.desc)}</div>
+        <div style="font-size:10px;color:#30465F;line-height:1.5;margin-top:3px">${esc(s.desc)}</div>
       </div>
     </div>`
     )
     .join('');
 
   return `
-<div style="width:595px;height:842px;background:#FAFBFD;position:relative;overflow:hidden;font-family:${FONTS.SANS}">
+<div style="width:595px;height:842px;background:linear-gradient(180deg, #FAFCFF 0%, #F5F8FF 100%);position:relative;overflow:hidden;font-family:${FONTS.SANS}">
   ${hdrStr(pageNum, isEs ? 'Siguientes pasos' : 'Next steps', st)}
 
   <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
@@ -69,12 +69,12 @@ export function genClose(st, pageNum = '99') {
       <div style="background:${N};border-radius:12px;padding:16px 18px;color:#fff;font-family:${FONTS.SANS}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <span style="width:5px;height:5px;border-radius:50%;background:${A}"></span>
-          <span style="font-family:${FONTS.MONO};font-size:9px;color:rgba(255,255,255,.65);letter-spacing:0.12em;text-transform:uppercase">${isEs ? 'Tu contacto' : 'Your contact'}</span>
+          <span style="font-family:${FONTS.MONO};font-size:9px;color:rgba(255,255,255,.9);letter-spacing:0.12em;text-transform:uppercase;font-weight:700">${isEs ? 'Tu contacto' : 'Your contact'}</span>
         </div>
         <div style="font-family:${FONTS.SERIF};font-size:18px;font-weight:600;letter-spacing:-0.01em;margin-bottom:3px">${esc(contactName)}</div>
-        <div style="font-size:9.5px;color:rgba(255,255,255,.65);margin-bottom:14px">${esc(contactRole)}</div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,.92);margin-bottom:14px;font-weight:600">${esc(contactRole)}</div>
         <div style="font-family:${FONTS.MONO};font-size:9.5px;color:#fff;letter-spacing:-0.005em;margin-bottom:4px">${esc(contactEmail)}</div>
-        ${contactPhone ? `<div style="font-family:${FONTS.MONO};font-size:9.5px;color:rgba(255,255,255,.7);letter-spacing:-0.005em">${esc(contactPhone)}</div>` : ''}
+        ${contactPhone ? `<div style="font-family:${FONTS.MONO};font-size:9.5px;color:#FFFFFF;letter-spacing:-0.005em">${esc(contactPhone)}</div>` : ''}
       </div>
     </div>
 
@@ -82,7 +82,7 @@ export function genClose(st, pageNum = '99') {
     <div style="display:flex;align-items:center;justify-content:space-between;background:${A}1A;border:1px solid ${A}44;border-radius:10px;padding:11px 16px;margin-top:18px">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="width:7px;height:7px;border-radius:50%;background:${A};box-shadow:0 0 8px ${A}"></span>
-        <span style="font-size:10.5px;color:#3D5166">${isEs ? 'Esta propuesta es válida hasta' : 'This proposal is valid until'}</span>
+        <span style="font-size:10.5px;color:#30465F">${isEs ? 'Esta propuesta es válida hasta' : 'This proposal is valid until'}</span>
       </div>
       <span style="font-family:${FONTS.MONO};font-size:11px;font-weight:600;color:${N};letter-spacing:-0.005em">${esc(validUntil)}</span>
     </div>
@@ -109,7 +109,7 @@ function signatureCell(role, name) {
   <div style="font-family:${FONTS.SANS}">
     <div style="height:48px;border-bottom:1px dashed #C0CCDB;margin-bottom:8px"></div>
     <div style="font-family:${FONTS.MONO};font-size:8.5px;color:#94A3B8;letter-spacing:0.1em;text-transform:uppercase">${esc(role)}</div>
-    <div style="font-size:10.5px;color:#3D5166;font-weight:500;margin-top:2px">${esc(name)}</div>
+    <div style="font-size:10.5px;color:#30465F;font-weight:500;margin-top:2px">${esc(name)}</div>
   </div>`;
 }
 

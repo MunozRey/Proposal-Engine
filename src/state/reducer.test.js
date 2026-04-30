@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { reducer } from './reducer.js';
 import { INIT } from './initialState.js';
+import { NAVY, BLUE } from '../constants.js';
 
 describe('reducer', () => {
   it('SET writes a top-level key', () => {
@@ -14,13 +15,13 @@ describe('reducer', () => {
     expect(s.date).toBe('2026');
   });
 
-  it('LOAD_THEME applies all patch keys and stamps activeThemeId', () => {
+  it('LOAD_THEME keeps strict CreditCheck brand lock', () => {
     const patch = { brandNavy: '#000', brandBlue: '#111', brandAccent: '#222' };
     const s = reducer(INIT, { t: 'LOAD_THEME', v: patch, id: 'mint' });
-    expect(s.brandNavy).toBe('#000');
-    expect(s.brandBlue).toBe('#111');
-    expect(s.brandAccent).toBe('#222');
-    expect(s.activeThemeId).toBe('mint');
+    expect(s.brandNavy).toBe(NAVY);
+    expect(s.brandBlue).toBe(BLUE);
+    expect(s.brandAccent).toBe('#FFCC00');
+    expect(s.activeThemeId).toBe('creditcheck');
   });
 
   it('CONTACT updates a single nested field', () => {
@@ -81,6 +82,32 @@ describe('reducer', () => {
   it('TYPO parses to number', () => {
     const s = reducer(INIT, { t: 'TYPO', k: 'body', v: '14' });
     expect(s.typo.body).toBe(14);
+  });
+
+  it('PLAN rec is exclusive when enabled', () => {
+    const seeded = {
+      ...INIT,
+      plans: [
+        { name: 'A', rec: false },
+        { name: 'B', rec: false },
+        { name: 'C', rec: true },
+      ],
+    };
+    const s = reducer(seeded, { t: 'PLAN', i: 1, f: 'rec', v: true });
+    expect(s.plans.map((p) => p.rec)).toEqual([false, true, false]);
+  });
+
+  it('PLAN rec can be switched but never duplicates', () => {
+    const seeded = {
+      ...INIT,
+      plans: [
+        { name: 'A', rec: true },
+        { name: 'B', rec: false },
+        { name: 'C', rec: false },
+      ],
+    };
+    const s = reducer(seeded, { t: 'PLAN', i: 2, f: 'rec', v: true });
+    expect(s.plans.map((p) => p.rec)).toEqual([false, false, true]);
   });
 
   it('RESET keeps language', () => {

@@ -1,4 +1,5 @@
 import { getTemplateDefaults } from './templateDefaults.js';
+import { CREDITCHECK_BRAND } from '../design/brandLock.js';
 /**
  * @typedef {'wl'|'leads'|'combo'} ProposalType
  *
@@ -105,14 +106,14 @@ export const INIT = {
   // Kept for back-compat with stored proposals — generators ignore it.
   coverLine3: '',
 
-  // ── Brand colors (empty = use defaults from constants.js) ──
-  brandNavy: '',
-  brandBlue: '',
-  brandAccent: '',
-  fontDisplay: '',
-  fontBody: '',
-  fontMono: '',
-  activeThemeId: 'creditcheck',
+  // ── Brand lock (fixed CreditCheck identity) ────────────────
+  brandNavy: CREDITCHECK_BRAND.navy,
+  brandBlue: CREDITCHECK_BRAND.blue,
+  brandAccent: CREDITCHECK_BRAND.accent,
+  fontDisplay: CREDITCHECK_BRAND.fontDisplay,
+  fontBody: CREDITCHECK_BRAND.fontBody,
+  fontMono: CREDITCHECK_BRAND.fontMono,
+  activeThemeId: CREDITCHECK_BRAND.themeId,
 
   // ── Why CreditCheck page (editable hero metrics + value props) ──
   whyIntro: '',
@@ -136,8 +137,8 @@ export const INIT = {
   currency: 'EUR',
 
   // ── Footer / Header (editables) ─────────────────────────────
-  footerLeft: 'Your Company · Confidential',
-  footerRight: 'your-domain.com',
+  footerLeft: 'CreditCheck · Confidential',
+  footerRight: 'creditchecker.io',
 
   // ── Page visibility (set of page labels to HIDE) ─────────────
   hiddenPages: [],

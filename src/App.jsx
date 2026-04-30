@@ -15,6 +15,8 @@ import { ProposalManager } from './components/ProposalManager.jsx';
 import { PagesTab } from './components/PagesTab.jsx';
 import { PageCard } from './components/PageCard.jsx';
 import { exportPDF } from './utils/exportPdf.js';
+import { exportHtml } from './utils/exportHtml.js';
+import { exportDocx } from './utils/exportDocx.js';
 import { genPage1 } from './pages/genPage1.js';
 import { genPage2 } from './pages/genPage2.js';
 import { genPage3 } from './pages/genPage3.js';
@@ -23,20 +25,23 @@ import { genLeadsCPL } from './pages/leads/genLeadsCPL.js';
 import { genLeadsCPA } from './pages/leads/genLeadsCPA.js';
 import { genLeadsHybrid } from './pages/leads/genLeadsHybrid.js';
 import { genWhyCC } from './pages/genWhyCC.js';
-import { genClose } from './pages/genClose.js';
 import { t, listLocales, normalizeLang } from './i18n/translate.js';
 import { EditorShell } from './components/editor/EditorShell.jsx';
 import { CommandPalette } from './components/editor/CommandPalette.jsx';
 import { ShortcutsHelp } from './components/editor/ShortcutsHelp.jsx';
 import { useShortcuts } from './hooks/useShortcuts.js';
 import { icon as svgIcon } from './design/icons.js';
+import { enforceCreditcheckBrand } from './design/brandLock.js';
+import { ensureSingleRecommendedPlan } from './utils/plans.js';
 
 const TABS_WL = ['client', 'content', 'pricing', 'pages', 'style', 'save'];
 const TABS_LEADS = ['client', 'content', 'pricing', 'pages', 'style', 'save'];
 const TABS_COMBO = ['client', 'content', 'pricing', 'leadsP', 'pages', 'style', 'save'];
 
 const savedState = loadState();
-const initialState = savedState ? { ...INIT, ...savedState } : INIT;
+const initialState = ensureSingleRecommendedPlan(
+  enforceCreditcheckBrand(savedState ? { ...INIT, ...savedState } : INIT)
+);
 const debouncedSave = createDebouncedSave(500);
 
 function App() {
@@ -52,6 +57,8 @@ function App() {
   const [collapsed, setCollapsed] = useState(false);
   const [autoFit, setAutoFit] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [exportingHtml, setExportingHtml] = useState(false);
+  const [exportingDocx, setExportingDocx] = useState(false);
   const [toast, setToast] = useState(null);
   const [lastExportJson, setLastExportJson] = useState(null);
   const [sidebarW, setSidebarW] = useState(360);
@@ -98,6 +105,33 @@ function App() {
       setExporting(false);
     }
   }, [exporting, st, showToast, lang]);
+
+  const handleExportHtml = useCallback(async () => {
+    if (exportingHtml) return;
+    setExportingHtml(true);
+    try {
+      exportHtml(visiblePagesRef.current, st.clientName, lang);
+      showToast(`✓ ${t(lang, 'app.toastExportedHtml')}`);
+    } finally {
+      setExportingHtml(false);
+    }
+  }, [exportingHtml, st.clientName, lang, showToast]);
+
+  const handleExportDocx = useCallback(async () => {
+    if (exportingDocx) return;
+    setExportingDocx(true);
+    try {
+      await exportDocx(visiblePagesRef.current, st.clientName, lang);
+      showToast(`✓ ${t(lang, 'app.toastExportedDocx')}`);
+    } finally {
+      setExportingDocx(false);
+    }
+  }, [exportingDocx, st.clientName, lang, showToast]);
+
+  const handlePrint = useCallback(() => {
+    window.print();
+    showToast(`✓ ${t(lang, 'app.toastPrintReady')}`);
+  }, [lang, showToast]);
 
   /* ── Sidebar resize drag ─────────────────────────── */
   const onDragStart = useCallback((e) => {
@@ -181,11 +215,7 @@ function App() {
     const safe = (v) => (v && String(v).trim() !== '' ? 1 : 0);
     const clientFilled = safe(st.clientName);
     const contentFilled =
-      safe(st.coverLine1) +
-      safe(st.productTitle) +
-      safe(st.steps?.[0]?.title) +
-      safe(st.steps?.[1]?.title) +
-      safe(st.steps?.[2]?.title);
+      safe(st.steps?.[0]?.title) + safe(st.steps?.[1]?.title) + safe(st.steps?.[2]?.title);
     const pricingFilled = (st.pricingPlans || []).filter((p) => p.title && p.price).length;
     return {
       client: clientFilled ? 1 : 0,
@@ -200,8 +230,6 @@ function App() {
   const completedFields = useMemo(() => {
     let n = 0;
     if (st.clientName) n++;
-    if (st.coverLine1) n++;
-    if (st.productTitle) n++;
     if (st.date) n++;
     if (st.clientLogoUrl) n++;
     if (st.ccLogoUrl) n++;
@@ -209,10 +237,9 @@ function App() {
     if (st.steps?.[1]?.title) n++;
     if (st.steps?.[2]?.title) n++;
     if ((st.pricingPlans || []).filter((p) => p.title).length >= 3) n++;
-    if (st.brandNavy && st.brandBlue) n++;
     return n;
   }, [st]);
-  const totalFields = 12;
+  const totalFields = 11;
 
   /* ── Dynamic page numbering ──────────────────────── */
   const allPageDefs = useMemo(() => {
@@ -220,11 +247,6 @@ function App() {
       id: 'whyCC',
       baseLabel: t(lang, 'pageTitles.whyCC'),
       gen: (n) => genWhyCC(st, n),
-    };
-    const closing = {
-      id: 'close',
-      baseLabel: t(lang, 'pageTitles.close'),
-      gen: (n) => genClose(st, n),
     };
     if (pType === 'combo') {
       return [
@@ -244,7 +266,6 @@ function App() {
           baseLabel: t(lang, 'pageTitles.hybridModel'),
           gen: (n) => genLeadsHybrid(st, n),
         },
-        closing,
       ];
     }
     if (pType === 'leads') {
@@ -263,7 +284,6 @@ function App() {
           baseLabel: t(lang, 'pageTitles.hybridModel'),
           gen: (n) => genLeadsHybrid(st, n),
         },
-        closing,
       ];
     }
     return [
@@ -271,7 +291,6 @@ function App() {
       whyCC,
       { id: 'how', baseLabel: t(lang, 'pageTitles.howItWorks'), gen: (n) => genPage2(st, n) },
       { id: 'pricing', baseLabel: t(lang, 'pageTitles.pricing'), gen: (n) => genPage3(st, n) },
-      closing,
     ];
   }, [st, pType, lang]);
 
@@ -330,6 +349,9 @@ function App() {
         },
       },
       { combo: 'mod+e', handler: () => handleExport() },
+      { combo: 'mod+shift+e', handler: () => handleExportHtml() },
+      { combo: 'mod+alt+e', handler: () => handleExportDocx() },
+      { combo: 'mod+p', handler: () => handlePrint() },
       { combo: 'mod+k', handler: () => setCmdOpen(true), allowInInputs: true },
       { combo: 'mod+/', handler: () => setShortcutsOpen(true), allowInInputs: true },
       {
@@ -341,7 +363,17 @@ function App() {
         allowInInputs: true,
       },
     ],
-    [canUndo, canRedo, undo, redo, handleExport, lang]
+    [
+      canUndo,
+      canRedo,
+      undo,
+      redo,
+      handleExport,
+      handleExportHtml,
+      handleExportDocx,
+      handlePrint,
+      lang,
+    ]
   );
 
   /* ── Command palette commands ───────────────────── */
@@ -352,15 +384,39 @@ function App() {
         id: 'export',
         label: t(lang, 'app.exportPdf'),
         icon: 'download',
-        section: 'Actions',
+        section: t(lang, 'app.commandSectionActions'),
         combo: 'mod+e',
         run: () => handleExport(),
+      },
+      {
+        id: 'export-html',
+        label: t(lang, 'app.exportHtml'),
+        icon: 'download',
+        section: t(lang, 'app.commandSectionActions'),
+        combo: 'mod+shift+e',
+        run: () => handleExportHtml(),
+      },
+      {
+        id: 'export-docx',
+        label: t(lang, 'app.exportDocx'),
+        icon: 'download',
+        section: t(lang, 'app.commandSectionActions'),
+        combo: 'mod+alt+e',
+        run: () => handleExportDocx(),
+      },
+      {
+        id: 'print',
+        label: t(lang, 'app.print'),
+        icon: 'download',
+        section: t(lang, 'app.commandSectionActions'),
+        combo: 'mod+p',
+        run: () => handlePrint(),
       },
       {
         id: 'undo',
         label: t(lang, 'app.undo'),
         icon: 'arrowRight',
-        section: 'Actions',
+        section: t(lang, 'app.commandSectionActions'),
         combo: 'mod+z',
         run: () => canUndo && undo(),
       },
@@ -368,7 +424,7 @@ function App() {
         id: 'redo',
         label: t(lang, 'app.redo'),
         icon: 'arrowRight',
-        section: 'Actions',
+        section: t(lang, 'app.commandSectionActions'),
         combo: 'mod+shift+z',
         run: () => canRedo && redo(),
       },
@@ -376,14 +432,14 @@ function App() {
         id: 'reset',
         label: t(lang, 'app.reset'),
         icon: 'xCircle',
-        section: 'Actions',
+        section: t(lang, 'app.commandSectionActions'),
         run: () => handleReset(),
       },
       {
         id: 'shortcuts',
         label: t(lang, 'app.keyboardShortcuts'),
         icon: 'key',
-        section: 'Help',
+        section: t(lang, 'app.commandSectionHelp'),
         combo: 'mod+/',
         run: () => setShortcutsOpen(true),
       },
@@ -391,7 +447,7 @@ function App() {
         id: 'collapse',
         label: collapsed ? t(lang, 'app.openPanel') : t(lang, 'app.collapse'),
         icon: 'arrowRight',
-        section: 'View',
+        section: t(lang, 'app.commandSectionView'),
         run: () => setCollapsed((c) => !c),
       }
     );
@@ -400,7 +456,7 @@ function App() {
         id: `goto-${id}`,
         label: `${t(lang, 'shared.search')}: ${tabLabels[id]}`,
         icon: 'fileSearch',
-        section: 'Navigate',
+        section: t(lang, 'app.commandSectionNavigate'),
         run: () => switchTab(id),
       });
     });
@@ -424,6 +480,9 @@ function App() {
     undo,
     redo,
     handleExport,
+    handleExportHtml,
+    handleExportDocx,
+    handlePrint,
     handleReset,
     dispatch,
     switchTab,
@@ -433,6 +492,9 @@ function App() {
   const shortcutsList = useMemo(
     () => [
       { label: t(lang, 'app.exportPdf'), combo: 'mod+e' },
+      { label: t(lang, 'app.exportHtml'), combo: 'mod+shift+e' },
+      { label: t(lang, 'app.exportDocx'), combo: 'mod+alt+e' },
+      { label: t(lang, 'app.print'), combo: 'mod+p' },
       { label: t(lang, 'app.undo'), combo: 'mod+z' },
       { label: t(lang, 'app.redo'), combo: ['mod+shift+z', 'mod+y'] },
       { label: t(lang, 'app.commandPalette'), combo: 'mod+k' },
@@ -517,10 +579,29 @@ function App() {
           calcZoom();
         }}
         onExport={handleExport}
+        onExportHtml={handleExportHtml}
+        onExportDocx={handleExportDocx}
+        onPrint={handlePrint}
         exporting={exporting}
+        exportingHtml={exportingHtml}
+        exportingDocx={exportingDocx}
         exportLabel={t(lang, 'app.exportPdf')}
+        exportHtmlLabel={t(lang, 'app.exportHtml')}
+        exportDocxLabel={t(lang, 'app.exportDocx')}
+        printLabel={t(lang, 'app.print')}
         generatingLabel={t(lang, 'app.generating')}
+        generatingHtmlLabel={t(lang, 'app.generatingHtml')}
+        generatingDocxLabel={t(lang, 'app.generatingDocx')}
         ctrlEHint={t(lang, 'app.downloadsAsPdf')}
+        ctrlShiftEHint={t(lang, 'app.downloadsAsHtml')}
+        ctrlAltEHint={t(lang, 'app.downloadsAsDocx')}
+        ctrlPHint={t(lang, 'app.opensPrint')}
+        undoTitle={t(lang, 'app.undo')}
+        redoTitle={t(lang, 'app.redo')}
+        shortcutsTitle={t(lang, 'app.keyboardShortcuts')}
+        languageTitle={t(lang, 'languageLabel')}
+        collapseTitle={t(lang, 'app.collapse')}
+        fitLabel={t(lang, 'app.fit')}
         hasUnsavedChanges={hasUnsavedChanges}
         onReset={handleReset}
         resetLabel={t(lang, 'app.reset')}

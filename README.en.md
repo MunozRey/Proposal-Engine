@@ -2,8 +2,8 @@
 
 Internal SaaS for the **CreditCheck** team to author commercial proposals
 (White-Label, Leads — CPL/CPA/Hybrid — and Combo) with a real-time preview
-and a one-click PDF export. Aligned with the [creditchecker.io](https://creditchecker.io)
-brand.
+and multi-format exports (PDF, HTML, DOCX, and print-ready output). Aligned
+with the [creditchecker.io](https://creditchecker.io) brand.
 
 ## Stack
 
@@ -54,6 +54,8 @@ App URL: `http://localhost:3131` (port from `.claude/launch.json`).
   preview and the PDF export.
 - `src/state/` — reducer, initial state, per-locale template defaults.
 - `src/utils/exportPdf.js` — PDF export pipeline (raster @ 4x).
+- `src/utils/exportHtml.js` — self-contained HTML export.
+- `src/utils/exportDocx.js` — DOCX export.
 - `src/utils/storage.js` — debounced localStorage persistence.
 - `src/i18n/locales/{en,es,pt,fr,de,it}.js` — translation files.
 - `src/design/` — tokens, themes and inline icon library.
@@ -62,8 +64,8 @@ App URL: `http://localhost:3131` (port from `.claude/launch.json`).
 
 1. The user edits Client / Content / Pricing / Style in the left panel.
 2. The page generators emit HTML for the live preview.
-3. On export, `exportPdf.js` rasterises each page at 4x and emits an
-   A4 PDF (PNG-backed, locale suffix in filename).
+3. On export, users can generate PDF, HTML, DOCX or trigger print mode;
+   filenames include locale suffixes for portability.
 4. State is persisted to `localStorage` via debounced autosave.
 
 ## Languages
@@ -84,3 +86,4 @@ App URL: `http://localhost:3131` (port from `.claude/launch.json`).
 
 See [`docs/`](./docs/) for the full architecture, design system,
 i18n guide, contributing rules and deployment runbook.
+For release verification, use [`docs/VERIFICATION-CHECKLIST.md`](./docs/VERIFICATION-CHECKLIST.md).

@@ -34,6 +34,10 @@ visible behaviour change worth communicating to the team.
 - **Command palette** — `Ctrl+K` (`src/components/editor/CommandPalette.jsx`).
 - **Keyboard shortcuts overlay** — `Ctrl+/`
   (`src/components/editor/ShortcutsHelp.jsx`).
+- **Additional export formats**:
+  - `src/utils/exportHtml.js` for self-contained HTML exports.
+  - `src/utils/exportDocx.js` for DOCX exports.
+  - Print flow via browser print dialog (`Ctrl+P`) and `@media print`.
 - **Editor primitives** — `Card`, `SectionHeader`, `IconButton`,
   `SaveIndicator`, `CompletionMeter`, plus `Field*` components
   (`FieldText`, `FieldNumber`, `FieldUrl`, `FieldEmail`, `FieldColor`,
@@ -51,7 +55,7 @@ visible behaviour change worth communicating to the team.
 - **Reducer verbs**: `LOAD_THEME`, `PATCH`, `CONTACT`, `METRIC*`,
   `VALUEPROP*`, `CLOSESTEP*`.
 - **Tests** — vitest unit suites for tokens, themes, validators,
-  reducer, translate, format, coverage. 84 tests across 7 files.
+  reducer, translate, format, coverage, and export utilities.
 - **Documentation** — `docs/ARCHITECTURE.md`, `docs/DESIGN-SYSTEM.md`,
   `docs/I18N.md`, `docs/CONTRIBUTING.md`, `docs/DEPLOYMENT.md`,
   `docs/CHANGELOG.md`.
@@ -84,6 +88,7 @@ visible behaviour change worth communicating to the team.
   output switched to **PNG** (was JPEG q=0.93), `useCORS: true`,
   per-page `await document.fonts.ready`, raster logo pre-shrink at
   600px max side, output filename includes locale suffix.
+- **Export UX and i18n** — editor now supports PDF (`Ctrl+E`), HTML (`Ctrl+Shift+E`), DOCX (`Ctrl+Alt+E`), and print (`Ctrl+P`) with localized labels and command palette entries.
 - **i18n storage** — `src/i18n/translations.js` reduced to a backwards-
   compat shim that re-exports `LOCALES` from the new `translate.js`.
 - **Editor chrome** uses the official brand variables and IBM Plex

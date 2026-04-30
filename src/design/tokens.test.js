@@ -10,11 +10,11 @@ describe('tokens', () => {
     expect(t.type.scale.body).toBe(TOKEN_DEFAULTS.typo.scale.body);
   });
 
-  it('overrides brand colors from state', () => {
+  it('keeps CreditCheck brand colors locked even when state provides overrides', () => {
     const t = tokens({ brandNavy: '#000000', brandBlue: '#FF0000', brandAccent: '#00FF00' });
-    expect(t.color.brand.navy).toBe('#000000');
-    expect(t.color.brand.blue).toBe('#FF0000');
-    expect(t.color.brand.accent).toBe('#00FF00');
+    expect(t.color.brand.navy).toBe(TOKEN_DEFAULTS.brand.navy);
+    expect(t.color.brand.blue).toBe(TOKEN_DEFAULTS.brand.blue);
+    expect(t.color.brand.accent).toBe(TOKEN_DEFAULTS.brand.accent);
   });
 
   it('respects legacy typo size keys', () => {
@@ -39,8 +39,8 @@ describe('tokens', () => {
     expect(t.page.height).toBeCloseTo(841.89);
   });
 
-  it('inverse surface follows brand navy override', () => {
+  it('inverse surface follows locked CreditCheck navy', () => {
     const t = tokens({ brandNavy: '#123456' });
-    expect(t.color.surface.inverse).toBe('#123456');
+    expect(t.color.surface.inverse).toBe(TOKEN_DEFAULTS.brand.navy);
   });
 });

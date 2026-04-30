@@ -34,14 +34,14 @@ export function genPage2(st, pageNum = '01') {
     : `What ${esc(st.clientName || 'the client')} receives per verification`;
 
   return `
-<div style="width:595px;height:842px;background:#FAFBFD;position:relative;overflow:hidden;font-family:${FONTS.SANS}">
+<div style="width:595px;height:842px;background:linear-gradient(180deg, #FAFCFF 0%, #F5F8FF 100%);position:relative;overflow:hidden;font-family:${FONTS.SANS}">
   ${hdrStr(pageNum, headerLabel, st)}
 
   <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
     ${eyebrowStr(isEs ? 'Cómo funciona' : 'How it works')}
     ${titleStr(isEs ? 'Calificación crediticia, integrada en tu flujo' : 'Credit qualification, embedded in your flow', N, 22)}
     <div style="height:14px"></div>
-    ${leadStr(intro, '#3D5166', 11)}
+    ${leadStr(intro, '#30465F', 11)}
 
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:22px">
       ${stepsHtml}

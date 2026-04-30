@@ -5,13 +5,9 @@ import { fetchLogoFromDomain } from '../utils/logoFetch.js';
 export function ClientTab({ st, dispatch, t }) {
   const isEs = st.language === 'es';
   const [logoUrl, setLogoUrl] = useState('');
-  const [ccUrl, setCcUrl] = useState('');
   const [clientStatus, setClientStatus] = useState(null);
-  const [ccStatus, setCcStatus] = useState(null);
   const [clientLoading, setClientLoading] = useState(false);
-  const [ccLoading, setCcLoading] = useState(false);
   const cancelClient = useRef(null);
-  const cancelCc = useRef(null);
 
   function handleLogo(key, file) {
     if (!file) return;
@@ -28,18 +24,6 @@ export function ClientTab({ st, dispatch, t }) {
       dispatch,
       setClientStatus,
       setClientLoading,
-      st.language
-    );
-  }
-
-  function fetchCc() {
-    if (cancelCc.current) cancelCc.current();
-    cancelCc.current = fetchLogoFromDomain(
-      ccUrl,
-      'ccLogoUrl',
-      dispatch,
-      setCcStatus,
-      setCcLoading,
       st.language
     );
   }
@@ -113,48 +97,16 @@ export function ClientTab({ st, dispatch, t }) {
 
       <div className="field">
         <div className="field-label">
-          {isEs ? 'Logo de CreditCheck (transparente)' : 'CreditCheck logo (transparent)'}
+          {isEs ? 'Logo de CreditCheck (fijo)' : 'CreditCheck logo (fixed)'}
         </div>
-        <label className="upload-zone">
-          <div className="upload-zone-icon">©</div>
-          <div>
-            <div className="upload-zone-txt">
-              {isEs ? 'Subir logo de CreditCheck' : 'Upload CreditCheck logo'}
-            </div>
-            <div className="upload-zone-sub">
-              {isEs ? 'PNG con fondo transparente' : 'PNG with transparent background'}
-            </div>
-          </div>
-          <input
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={(e) => handleLogo('ccLogoUrl', e.target.files[0])}
-          />
-        </label>
-        <div style={{ marginTop: '6px' }}>
-          <div className="field-label">{isEs ? 'o buscar por dominio' : 'or search by domain'}</div>
-          <div className="logo-fetch">
-            <input
-              type="text"
-              value={ccUrl}
-              placeholder={isEs ? 'tu-marca.com' : 'your-brand.com'}
-              onChange={(e) => setCcUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') fetchCc();
-              }}
-            />
-            <button className="logo-fetch-btn" disabled={ccLoading} onClick={fetchCc}>
-              {ccLoading ? '...' : t('shared.search')}
-            </button>
-          </div>
-          {ccStatus && (
-            <div className={`logo-status ${ccStatus.ok ? 'ok' : 'err'}`}>{ccStatus.msg}</div>
-          )}
+        <div className="field-hint" style={{ marginBottom: '6px' }}>
+          {isEs
+            ? 'La marca de CreditCheck está bloqueada por política de branding.'
+            : 'CreditCheck branding is locked by policy.'}
         </div>
         <div className="upload-preview">
           <img
-            src={st.ccLogoUrl || CC_LOGO}
+            src={CC_LOGO}
             alt="CreditCheck logo"
             style={{ maxHeight: '28px', maxWidth: '100%', objectFit: 'contain' }}
           />

@@ -45,9 +45,10 @@ export function PricingTab({ st, dispatch }) {
               }}
             >
               <input
-                type="checkbox"
+                type="radio"
+                name="recommended-plan"
                 checked={pl.rec}
-                onChange={(e) => dispatch({ t: 'PLAN', i, f: 'rec', v: e.target.checked })}
+                onChange={() => dispatch({ t: 'PLAN', i, f: 'rec', v: true })}
               />{' '}
               {isEs ? 'Recomendado' : 'Recommended'}
             </label>
