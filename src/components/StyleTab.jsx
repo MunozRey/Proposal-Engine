@@ -1,43 +1,5 @@
 import { NAVY, BLUE } from '../constants.js';
 
-const TYPO_FIELDS = [
-  {
-    k: 'heading',
-    labelEn: 'Section headings',
-    labelEs: 'Titulos de seccion',
-    min: 8,
-    max: 18,
-    step: 0.5,
-  },
-  { k: 'subhead', labelEn: 'Subheadings', labelEs: 'Subtitulos', min: 6, max: 14, step: 0.5 },
-  { k: 'body', labelEn: 'Body text', labelEs: 'Texto principal', min: 5, max: 12, step: 0.5 },
-  {
-    k: 'small',
-    labelEn: 'Secondary text',
-    labelEs: 'Texto secundario',
-    min: 4,
-    max: 10,
-    step: 0.5,
-  },
-  {
-    k: 'tableBody',
-    labelEn: 'Table/plan text',
-    labelEs: 'Texto de tabla/plan',
-    min: 4,
-    max: 10,
-    step: 0.5,
-  },
-  { k: 'note', labelEn: 'Footnotes', labelEs: 'Notas', min: 3.5, max: 8, step: 0.5 },
-  {
-    k: 'micro',
-    labelEn: 'Minimum labels',
-    labelEs: 'Etiquetas minimas',
-    min: 3,
-    max: 7,
-    step: 0.5,
-  },
-];
-
 function ColorField({ label, value, fallback, onChange, resetLabel }) {
   const active = value || fallback;
   return (
@@ -85,8 +47,6 @@ function ColorField({ label, value, fallback, onChange, resetLabel }) {
 
 export function StyleTab({ st, dispatch, allPages, t }) {
   const isEs = st.language === 'es';
-  const T = st.typo;
-  const set = (k, v) => dispatch({ t: 'TYPO', k, v });
   const hidden = new Set(st.hiddenPages || []);
 
   return (
@@ -183,61 +143,6 @@ export function StyleTab({ st, dispatch, allPages, t }) {
         />
       </div>
 
-      {/* ── Typography ────────────────────────────────── */}
-      <div className="section-title">
-        <span>{t('shared.typography')}</span>
-      </div>
-      <p
-        style={{
-          fontSize: '10px',
-          color: 'var(--t-muted)',
-          marginBottom: '12px',
-          lineHeight: '1.5',
-        }}
-      >
-        {t('shared.typographyHint')}
-      </p>
-      {TYPO_FIELDS.map(({ k, labelEn, labelEs, min, max, step }) => (
-        <div key={k} className="field typo-field">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '3px',
-            }}
-          >
-            <div className="field-label" style={{ marginBottom: 0 }}>
-              {isEs ? labelEs : labelEn}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <button
-                className="typo-step-btn"
-                onClick={() => set(k, Math.max(min, +(T[k] - step).toFixed(1)))}
-              >
-                −
-              </button>
-              <span className="typo-val">{T[k]}px</span>
-              <button
-                className="typo-step-btn"
-                onClick={() => set(k, Math.min(max, +(T[k] + step).toFixed(1)))}
-              >
-                +
-              </button>
-            </div>
-          </div>
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={T[k]}
-            onChange={(e) => set(k, e.target.value)}
-            style={{ width: '100%', accentColor: 'var(--blue)', cursor: 'pointer' }}
-          />
-        </div>
-      ))}
-
       {/* ── Reset ─────────────────────────────────────── */}
       <div className="section-title" style={{ marginTop: '16px' }}>
         <span>{t('shared.resetSection')}</span>
@@ -246,11 +151,6 @@ export function StyleTab({ st, dispatch, allPages, t }) {
         className="btn-add"
         style={{ marginTop: '4px' }}
         onClick={() => {
-          dispatch({
-            t: 'SET',
-            k: 'typo',
-            v: { heading: 18, subhead: 14, body: 12, small: 10, tableBody: 10, note: 8, micro: 7 },
-          });
           dispatch({ t: 'SET', k: 'brandNavy', v: '' });
           dispatch({ t: 'SET', k: 'brandBlue', v: '' });
         }}

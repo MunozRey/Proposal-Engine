@@ -91,6 +91,21 @@ const ICONS = {
     ),
   // Action
   arrowRight: (s, c, w) => svg('<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>', s, c, w),
+  arrowLeft: (s, c, w) => svg('<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>', s, c, w),
+  undo: (s, c, w) =>
+    svg('<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.7 2.97L3 13"/>', s, c, w),
+  redo: (s, c, w) =>
+    svg('<path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6.7 2.97L21 13"/>', s, c, w),
+  panelLeft: (s, c, w) =>
+    svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>', s, c, w),
+  search: (s, c, w) => svg('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>', s, c, w),
+  rotateCcw: (s, c, w) =>
+    svg(
+      '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+      s,
+      c,
+      w
+    ),
   download: (s, c, w) =>
     svg(
       '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',

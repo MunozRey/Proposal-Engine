@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { icon as svgIcon } from '../../design/icons.js';
 import { listLocales } from '../../i18n/translate.js';
 import { IconButton } from './IconButton.jsx';
@@ -94,28 +94,40 @@ export function EditorShell({
         </div>
         <div className="ed-topbar-actions">
           <SaveIndicator status={saveStatus} label={saveLabel} />
-          <IconButton iconName="lock" title="Undo" onClick={onUndo} disabled={!canUndo} size={14} />
-          <IconButton iconName="zap" title="Redo" onClick={onRedo} disabled={!canRedo} size={14} />
+          <IconButton
+            iconName="undo"
+            title={`Undo ${formatCombo('mod+z')}`}
+            onClick={onUndo}
+            disabled={!canUndo}
+            size={14}
+          />
+          <IconButton
+            iconName="redo"
+            title={`Redo ${formatCombo('mod+shift+z')}`}
+            onClick={onRedo}
+            disabled={!canRedo}
+            size={14}
+          />
           <IconButton
             iconName="key"
             title={`Shortcuts ${formatCombo('mod+/')}`}
             onClick={onShortcuts}
             size={14}
           />
-          {onSettings && (
-            <IconButton iconName="globe" title="Settings" onClick={onSettings} size={14} />
-          )}
-          <IconButton iconName="arrowRight" title="Collapse panel" onClick={onCollapse} size={14} />
+          <div style={{ position: 'relative' }} ref={localeMenuRef}>
+            <IconButton
+              iconName="globe"
+              title="Language"
+              onClick={() => (onSettings ? onSettings() : setLocaleMenuOpen((v) => !v))}
+              size={14}
+            />
+          </div>
+          <IconButton iconName="panelLeft" title="Collapse panel" onClick={onCollapse} size={14} />
         </div>
       </div>
 
-      <button
-        className="ed-search"
-        onClick={onCommandPalette}
-        type="button"
-        style={{ margin: '8px 14px 4px', padding: '8px 12px' }}
-      >
-        <span dangerouslySetInnerHTML={{ __html: svgIcon('fileSearch', { size: 14 }) }} />
+      <button className="ed-search" onClick={onCommandPalette} type="button">
+        <span dangerouslySetInnerHTML={{ __html: svgIcon('search', { size: 14 }) }} />
         <span>{searchPlaceholder}</span>
         <span className="ed-search-kbd">{cmdHint}</span>
       </button>
@@ -216,11 +228,9 @@ export function EditorShell({
         </div>
       </div>
 
-      {/* Locale menu (placeholder mount; topbar gear opens it via onSettings) */}
       <LocaleMenu
         open={localeMenuOpen}
         onClose={closeMenu}
-        ref={localeMenuRef}
         lang={lang}
         onLangChange={(v) => {
           onLangChange(v);
@@ -231,11 +241,28 @@ export function EditorShell({
   );
 }
 
-// eslint-disable-next-line no-unused-vars
 function LocaleMenu({ open, onClose, lang, onLangChange }) {
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const onClick = (e) => {
+      if (!e.target.closest('.ed-menu') && !e.target.closest('[title="Language"]')) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('mousedown', onClick);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('mousedown', onClick);
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
-    <div className="ed-menu" style={{ top: 56, right: 12 }}>
+    <div className="ed-menu" style={{ top: 50, right: 12, minWidth: 200 }}>
       {listLocales().map((loc) => (
         <button
           key={loc.code}

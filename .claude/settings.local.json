@@ -31,7 +31,9 @@
       "Bash(curl -sLo public/fonts/Larken-Regular.otf https://creditchecker.io/_nuxt/fonnts.com-Larken_Regular.CvnE_tds.otf)",
       "Bash(curl -sLo public/fonts/Larken-Medium.otf https://creditchecker.io/_nuxt/fonnts.com-Larken_Medium.CFygHqa5.otf)",
       "Bash(curl -sLo public/fonts/Larken-Bold.otf https://creditchecker.io/_nuxt/fonnts.com-Larken_Bold.kL5mNd1o.otf)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(ssh -T git@gitea.apps.privateprompt.tech)",
+      "Bash(git config *)"
     ]
   }
 }
