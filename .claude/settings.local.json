@@ -34,7 +34,10 @@
       "Bash(git add *)",
       "Bash(ssh -T git@gitea.apps.privateprompt.tech)",
       "Bash(git config *)",
-      "Bash(cursor --version)"
+      "Bash(cursor --version)",
+      "Bash(npx vitest *)",
+      "Bash(npx vite *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

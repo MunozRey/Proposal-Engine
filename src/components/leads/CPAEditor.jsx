@@ -1,10 +1,10 @@
 import { StringListEditor } from '../shared/StringListEditor.jsx';
 import { CalcEditor } from '../shared/CalcEditor.jsx';
 
-export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
+export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, t }) {
   return (
     <>
-      <div className="leads-subsection-label">{isEs ? 'Tramos por importe' : 'Amount tiers'}</div>
+      <div className="leads-subsection-label">{t('leads.cpa.tiers')}</div>
       {l.cpaTramos.map((row, i) => (
         <div key={i} className="leads-row-card">
           <button className="btn-remove" onClick={() => LAD('cpaTramos', i)}>
@@ -12,7 +12,7 @@ export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
           </button>
           <div className="two-col">
             <div>
-              <div className="field-label">{isEs ? 'Importe' : 'Amount'}</div>
+              <div className="field-label">{t('leads.cpa.amount')}</div>
               <input
                 type="text"
                 value={row.importe}
@@ -20,7 +20,7 @@ export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
               />
             </div>
             <div>
-              <div className="field-label">{isEs ? 'Fee fijo' : 'Fixed fee'}</div>
+              <div className="field-label">{t('leads.cpa.fixedFee')}</div>
               <input
                 type="text"
                 value={row.fee}
@@ -32,17 +32,17 @@ export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
       ))}
       <button
         className="btn-add"
-        onClick={() => LAA('cpaTramos', { importe: isEs ? 'Nuevo tramo' : 'New tier', fee: '€0' })}
+        onClick={() => LAA('cpaTramos', { importe: t('leads.cpa.newTier'), fee: '€0' })}
       >
-        {isEs ? '+ Anadir tramo' : '+ Add tier'}
+        {t('leads.cpa.addTier')}
       </button>
 
       <div className="leads-subsection-label" style={{ marginTop: '10px' }}>
-        {isEs ? 'Comision adicional' : 'Additional commission'}
+        {t('leads.cpa.commission')}
       </div>
       <div className="two-col field">
         <div>
-          <div className="field-label">{isEs ? 'Porcentaje' : 'Percentage'}</div>
+          <div className="field-label">{t('leads.cpa.percentage')}</div>
           <input
             type="text"
             value={l.cpaCommission}
@@ -50,7 +50,7 @@ export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
           />
         </div>
         <div>
-          <div className="field-label">{isEs ? 'Base de calculo' : 'Calculation base'}</div>
+          <div className="field-label">{t('leads.cpa.calcBase')}</div>
           <input
             type="text"
             value={l.cpaCommissionBase}
@@ -59,35 +59,33 @@ export function CPAEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
         </div>
       </div>
 
-      <div className="leads-subsection-label">
-        {isEs ? 'Funcionalidades (pag. CPA)' : 'Features (CPA pg.)'}
-      </div>
+      <div className="leads-subsection-label">{t('leads.cpa.features')}</div>
       <StringListEditor
         items={l.cpaFeatures}
         onEdit={(i, v) => LSE('cpaFeatures', i, v)}
         onAdd={() => LSA('cpaFeatures')}
         onDel={(i) => LSD('cpaFeatures', i)}
-        addLabel={isEs ? '+ Anadir funcionalidad' : '+ Add feature'}
+        addLabel={t('shared.addFeatureBtn')}
       />
 
       <div className="leads-subsection-label" style={{ marginTop: '10px' }}>
-        {isEs ? 'Ejemplo de calculo' : 'Calculation example'}
+        {t('leads.cpa.calcExample')}
       </div>
       <CalcEditor
         title={l.cpaCalcTitle}
         text={l.cpaCalcText}
         onTitleChange={(v) => LS('cpaCalcTitle', v)}
         onTextChange={(v) => LS('cpaCalcText', v)}
-        isEs={isEs}
+        t={t}
       />
 
-      <div className="leads-subsection-label">{isEs ? 'Notas (◆)' : 'Footnotes (◆)'}</div>
+      <div className="leads-subsection-label">{t('leads.cpa.notes')}</div>
       <StringListEditor
         items={l.cpaNotes}
         onEdit={(i, v) => LSE('cpaNotes', i, v)}
         onAdd={() => LSA('cpaNotes')}
         onDel={(i) => LSD('cpaNotes', i)}
-        addLabel={isEs ? '+ Anadir nota' : '+ Add note'}
+        addLabel={t('shared.addNoteBtn')}
       />
     </>
   );

@@ -1,16 +1,13 @@
 import { NAVY, BLUE } from '../constants.js';
 
-export function PricingTab({ st, dispatch }) {
-  const isEs = st.language === 'es';
+export function PricingTab({ st, dispatch, t }) {
   return (
     <div>
       <div className="section-title">
-        <span>{isEs ? 'Coste de setup' : 'Setup Fee'}</span>
+        <span>{t('pricingTab.setupCost')}</span>
       </div>
       <div className="field">
-        <div className="field-label">
-          {isEs ? 'Precio de implementacion' : 'Implementation price'}
-        </div>
+        <div className="field-label">{t('pricingTab.implementationPrice')}</div>
         <input
           type="text"
           value={st.setupFee}
@@ -19,7 +16,7 @@ export function PricingTab({ st, dispatch }) {
         />
       </div>
       <div className="section-title">
-        <span>{isEs ? 'Planes SaaS' : 'SaaS Plans'}</span>
+        <span>{t('pricingTab.saasPlans')}</span>
       </div>
       {st.plans.map((pl, i) => (
         <div key={i} className={`plan-card${pl.rec ? ' rec' : ''}`}>
@@ -50,12 +47,12 @@ export function PricingTab({ st, dispatch }) {
                 checked={pl.rec}
                 onChange={() => dispatch({ t: 'PLAN', i, f: 'rec', v: true })}
               />{' '}
-              {isEs ? 'Recomendado' : 'Recommended'}
+              {t('pricingTab.recommended')}
             </label>
           </div>
           <div className="two-col">
             <div>
-              <div className="field-label">{isEs ? 'Precio' : 'Price'}</div>
+              <div className="field-label">{t('pricingTab.price')}</div>
               <input
                 type="text"
                 value={pl.price}
@@ -63,7 +60,7 @@ export function PricingTab({ st, dispatch }) {
               />
             </div>
             <div>
-              <div className="field-label">{isEs ? 'Verificaciones' : 'Verifications'}</div>
+              <div className="field-label">{t('pricingTab.verifications')}</div>
               <input
                 type="text"
                 value={pl.verifs}
@@ -71,7 +68,7 @@ export function PricingTab({ st, dispatch }) {
               />
             </div>
             <div>
-              <div className="field-label">{isEs ? 'Coste medio' : 'Avg. cost'}</div>
+              <div className="field-label">{t('pricingTab.avgCost')}</div>
               <input
                 type="text"
                 value={pl.avg}
@@ -79,7 +76,7 @@ export function PricingTab({ st, dispatch }) {
               />
             </div>
             <div>
-              <div className="field-label">{isEs ? 'Verif. extra' : 'Extra verif.'}</div>
+              <div className="field-label">{t('pricingTab.extraVerif')}</div>
               <input
                 type="text"
                 value={pl.extra}

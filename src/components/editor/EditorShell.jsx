@@ -11,7 +11,6 @@ const SECTION_ICONS = {
   content: 'fileSearch',
   pricing: 'lineChart',
   leadsP: 'lineChart',
-  pages: 'badgeCheck',
   style: 'sparkles',
   save: 'download',
 };
@@ -69,12 +68,20 @@ export function EditorShell({
   generatingLabel,
   generatingHtmlLabel,
   generatingDocxLabel,
-  ctrlEHint,
-  ctrlShiftEHint,
-  ctrlAltEHint,
-  ctrlPHint,
   totalFields,
   completedFields,
+  // Bottom bar section labels
+  progressLabel = 'Progreso',
+  fieldsLabel = 'campos',
+  zoomLabel = 'Zoom',
+  autoFitLabel = 'Auto',
+  manualLabel = 'Manual',
+  autoFitHint,
+  exportSectionLabel = 'Exportar',
+  unsavedHint,
+  completeStatusLabel = 'Completado',
+  partialStatusLabel = 'En progreso',
+  emptyStatusLabel = 'Sin rellenar',
   // Collapse
   collapsed,
   onCollapse,
@@ -98,7 +105,7 @@ export function EditorShell({
     <div
       id="ed-shell"
       className={collapsed ? 'ed-collapsed' : ''}
-      style={collapsed ? {} : { width, minWidth: width }}
+      style={collapsed ? {} : { width, minWidth: width, maxWidth: width }}
     >
       <div className="ed-topbar">
         <div className="ed-topbar-brand">
@@ -113,23 +120,25 @@ export function EditorShell({
         </div>
         <div className="ed-topbar-actions">
           <SaveIndicator status={saveStatus} label={saveLabel} />
+          <span className="ed-topbar-divider" aria-hidden="true" />
           <IconButton
             iconName="undo"
-            title={`${undoTitle} ${formatCombo('mod+z')}`}
+            title={`${undoTitle} (${formatCombo('mod+z')})`}
             onClick={onUndo}
             disabled={!canUndo}
             size={14}
           />
           <IconButton
             iconName="redo"
-            title={`${redoTitle} ${formatCombo('mod+shift+z')}`}
+            title={`${redoTitle} (${formatCombo('mod+shift+z')})`}
             onClick={onRedo}
             disabled={!canRedo}
             size={14}
           />
+          <span className="ed-topbar-divider" aria-hidden="true" />
           <IconButton
             iconName="key"
-            title={`${shortcutsTitle} ${formatCombo('mod+/')}`}
+            title={`${shortcutsTitle} (${formatCombo('mod+/')})`}
             onClick={onShortcuts}
             size={14}
           />
@@ -169,12 +178,19 @@ export function EditorShell({
         {tabsDef.map((id) => {
           const completion = tabCompletion[id];
           const isActive = tab === id;
+          const progressTitle =
+            completion === 1
+              ? completeStatusLabel
+              : completion === 0
+                ? emptyStatusLabel
+                : partialStatusLabel;
           return (
             <button
               key={id}
               type="button"
               className={`ed-tab${isActive ? ' ed-active' : ''}`}
               onClick={() => setTab(id)}
+              title={`${tabLabels[id]} · ${progressTitle}`}
             >
               <span
                 dangerouslySetInnerHTML={{
@@ -190,6 +206,7 @@ export function EditorShell({
                   className={`ed-tab-progress ${
                     completion === 1 ? 'ed-complete' : completion === 0 ? 'ed-empty' : ''
                   }`}
+                  aria-label={progressTitle}
                 />
               )}
             </button>
@@ -200,72 +217,113 @@ export function EditorShell({
       <div className="ed-body">{children}</div>
 
       <div className="ed-bottombar">
-        <CompletionMeter value={completedFields} total={totalFields} />
-        <div className="ed-zoom-row">
-          <span dangerouslySetInnerHTML={{ __html: svgIcon('lineChart', { size: 12 }) }} />
-          <input
-            type="range"
-            min="0.25"
-            max="1.5"
-            step="0.01"
-            value={zoom}
-            onChange={(e) => onZoomChange(parseFloat(e.target.value))}
-          />
-          <span className="ed-zoom-pct">{Math.round(zoom * 100)}%</span>
-          <button
-            type="button"
-            className={`ed-fit-btn${autoFit ? ' ed-active' : ''}`}
-            onClick={onFit}
-          >
-            {fitLabel}
-          </button>
+        <div className="ed-bb-section">
+          <div className="ed-bb-label">
+            <span>{progressLabel}</span>
+            <span className="ed-bb-label-help">
+              {completedFields} / {totalFields} {fieldsLabel}
+            </span>
+          </div>
+          <CompletionMeter value={completedFields} total={totalFields} />
         </div>
-        <div className="ed-export-grid">
-          <button
-            type="button"
-            className={`ed-export-btn${hasUnsavedChanges ? ' ed-has-changes' : ''}`}
-            disabled={exporting}
-            onClick={onExport}
-          >
-            <span
-              dangerouslySetInnerHTML={{
-                __html: svgIcon('download', { size: 16, color: '#fff' }),
-              }}
+
+        <div className="ed-bb-section">
+          <div className="ed-bb-label">
+            <span>{zoomLabel}</span>
+            <span className="ed-bb-label-help">{autoFit ? autoFitLabel : manualLabel}</span>
+          </div>
+          <div className="ed-zoom-row">
+            <input
+              type="range"
+              min="0.25"
+              max="1.5"
+              step="0.01"
+              value={zoom}
+              onChange={(e) => onZoomChange(parseFloat(e.target.value))}
+              aria-label={zoomLabel}
             />
-            {exporting ? generatingLabel : exportLabel}
-          </button>
-          <button
-            type="button"
-            className="ed-export-btn ed-export-btn-alt"
-            disabled={exportingHtml}
-            onClick={onExportHtml}
-          >
-            {exportingHtml ? generatingHtmlLabel : exportHtmlLabel}
-          </button>
-          <button
-            type="button"
-            className="ed-export-btn ed-export-btn-alt"
-            disabled={exportingDocx}
-            onClick={onExportDocx}
-          >
-            {exportingDocx ? generatingDocxLabel : exportDocxLabel}
-          </button>
-          <button type="button" className="ed-export-btn ed-export-btn-alt" onClick={onPrint}>
-            {printLabel}
-          </button>
+            <span className="ed-zoom-pct">{Math.round(zoom * 100)}%</span>
+            <button
+              type="button"
+              className={`ed-fit-btn${autoFit ? ' ed-active' : ''}`}
+              onClick={onFit}
+              title={autoFitHint}
+            >
+              {fitLabel}
+            </button>
+          </div>
         </div>
+
+        <div className="ed-bb-section">
+          <div className="ed-bb-label">
+            <span>{exportSectionLabel}</span>
+            {hasUnsavedChanges && (
+              <span className="ed-bb-label-help" style={{ color: 'var(--ed-warning-deep)' }}>
+                {unsavedHint}
+              </span>
+            )}
+          </div>
+          <div className="ed-export-grid">
+            <button
+              type="button"
+              className={`ed-export-btn${hasUnsavedChanges ? ' ed-has-changes' : ''}`}
+              disabled={exporting}
+              onClick={onExport}
+              title={`${exportLabel} · ${formatCombo('mod+e')}`}
+            >
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: svgIcon('download', { size: 16, color: '#fff' }),
+                }}
+              />
+              {exporting ? generatingLabel : exportLabel}
+            </button>
+            <button
+              type="button"
+              className="ed-export-btn ed-export-btn-alt"
+              disabled={exportingHtml}
+              onClick={onExportHtml}
+              title={`${exportHtmlLabel} · ${formatCombo('mod+shift+e')}`}
+            >
+              {exportingHtml ? generatingHtmlLabel : exportHtmlLabel}
+            </button>
+            <button
+              type="button"
+              className="ed-export-btn ed-export-btn-alt"
+              disabled={exportingDocx}
+              onClick={onExportDocx}
+              title={`${exportDocxLabel} · ${formatCombo('mod+alt+e')}`}
+            >
+              {exportingDocx ? generatingDocxLabel : exportDocxLabel}
+            </button>
+            <button
+              type="button"
+              className="ed-export-btn ed-export-btn-alt"
+              onClick={onPrint}
+              title={`${printLabel} · ${formatCombo('mod+p')}`}
+            >
+              {printLabel}
+            </button>
+          </div>
+        </div>
+
         <div className="ed-bottombar-meta">
-          <span>
-            <span className="ed-kbd">{formatCombo('mod+e')}</span> {ctrlEHint} ·{' '}
-            <span className="ed-kbd">{formatCombo('mod+shift+e')}</span> {ctrlShiftEHint} ·{' '}
-            <span className="ed-kbd">{formatCombo('mod+alt+e')}</span> {ctrlAltEHint} ·{' '}
-            <span className="ed-kbd">{formatCombo('mod+p')}</span> {ctrlPHint}
-          </span>
+          <button
+            type="button"
+            className="ed-bottombar-meta-shortcuts"
+            onClick={onShortcuts}
+            title={shortcutsTitle}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            <span className="ed-kbd">{formatCombo('mod+/')}</span>
+            <span>{shortcutsTitle}</span>
+          </button>
           <button
             type="button"
             className="ed-btn ed-btn-ghost ed-btn-sm"
             onClick={onReset}
-            style={{ color: 'var(--ed-danger)' }}
+            style={{ color: 'var(--ed-danger-deep)' }}
+            title={resetLabel}
           >
             ↺ {resetLabel}
           </button>

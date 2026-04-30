@@ -17,26 +17,33 @@ function saveProposals(map) {
   }
 }
 
-export function ProposalManager({ st, dispatch, showToast }) {
-  const isEs = st.language === 'es';
+export function ProposalManager({ st, dispatch, showToast, t }) {
   const [proposals, setProposals] = useState(loadProposals);
   const [saveName, setSaveName] = useState('');
   const names = Object.keys(proposals).sort();
+  const dateLocale = st.language === 'es' ? 'es' : st.language || 'en';
 
   // Sync from localStorage in case another tab changed it
   useEffect(() => {
     setProposals(loadProposals());
   }, []);
 
+  const proposalDefault = t('manager.proposalDefault');
+  const labelFor = (state) =>
+    state.proposalType === 'leads'
+      ? 'Leads'
+      : state.proposalType === 'combo'
+        ? t('manager.combo')
+        : 'WL';
+  const defaultName = `${st.clientName || proposalDefault} · ${st.proposalType === 'leads' ? 'Leads' : 'WL'}`;
+
   const handleSave = () => {
-    const name =
-      saveName.trim() ||
-      `${st.clientName || (isEs ? 'Propuesta' : 'Proposal')} — ${st.proposalType === 'leads' ? 'Leads' : 'WL'}`;
+    const name = saveName.trim() || defaultName;
     const updated = { ...proposals, [name]: { ...st, _savedAt: new Date().toISOString() } };
     saveProposals(updated);
     setProposals(updated);
     setSaveName('');
-    showToast?.(`✓ ${isEs ? 'Guardado' : 'Saved'}: "${name}"`);
+    showToast?.(`✓ ${t('manager.toastSaved')}: "${name}"`);
   };
 
   const handleLoad = (name) => {
@@ -44,27 +51,27 @@ export function ProposalManager({ st, dispatch, showToast }) {
     if (!saved) return;
     const { _savedAt, ...state } = saved;
     dispatch({ t: 'LOAD', v: state });
-    showToast?.(`✓ ${isEs ? 'Cargado' : 'Loaded'}: "${name}"`);
+    showToast?.(`✓ ${t('manager.toastLoaded')}: "${name}"`);
   };
 
   const handleDelete = (name) => {
-    if (!window.confirm(`${isEs ? 'Eliminar' : 'Delete'} "${name}"?`)) return;
+    if (!window.confirm(`${t('manager.deleteConfirm')} "${name}"?`)) return;
     const { [name]: _, ...rest } = proposals;
     saveProposals(rest);
     setProposals(rest);
-    showToast?.(`✓ ${isEs ? 'Eliminado' : 'Deleted'}: "${name}"`);
+    showToast?.(`✓ ${t('manager.toastDeleted')}: "${name}"`);
   };
 
   return (
     <div>
       <div className="section-title">
-        <span>{isEs ? 'Guardar propuesta' : 'Save proposal'}</span>
+        <span>{t('manager.saveProposal')}</span>
       </div>
       <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
         <input
           type="text"
           value={saveName}
-          placeholder={`${st.clientName || (isEs ? 'Propuesta' : 'Proposal')} — ${st.proposalType === 'leads' ? 'Leads' : 'WL'}`}
+          placeholder={defaultName}
           onChange={(e) => setSaveName(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSave();
@@ -72,7 +79,7 @@ export function ProposalManager({ st, dispatch, showToast }) {
           style={{ flex: 1 }}
         />
         <button className="logo-fetch-btn" onClick={handleSave}>
-          {isEs ? 'Guardar' : 'Save'}
+          {t('manager.save')}
         </button>
       </div>
 
@@ -80,23 +87,14 @@ export function ProposalManager({ st, dispatch, showToast }) {
         <>
           <div className="section-title">
             <span>
-              {isEs ? 'Propuestas guardadas' : 'Saved proposals'} ({names.length})
+              {t('manager.savedProposals')} ({names.length})
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {names.map((name) => {
               const p = proposals[name];
-              const date = p._savedAt
-                ? new Date(p._savedAt).toLocaleDateString(isEs ? 'es' : 'en')
-                : '';
-              const type =
-                p.proposalType === 'leads'
-                  ? 'Leads'
-                  : p.proposalType === 'combo'
-                    ? isEs
-                      ? 'Combinado'
-                      : 'Combo'
-                    : 'WL';
+              const date = p._savedAt ? new Date(p._savedAt).toLocaleDateString(dateLocale) : '';
+              const type = labelFor(p);
               return (
                 <div
                   key={name}
@@ -141,7 +139,7 @@ export function ProposalManager({ st, dispatch, showToast }) {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {isEs ? 'Cargar' : 'Load'}
+                    {t('manager.load')}
                   </button>
                   <button
                     onClick={() => handleDelete(name)}

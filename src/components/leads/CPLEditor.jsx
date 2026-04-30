@@ -1,10 +1,10 @@
 import { StringListEditor } from '../shared/StringListEditor.jsx';
 import { CalcEditor } from '../shared/CalcEditor.jsx';
 
-export function CPLEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
+export function CPLEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, t }) {
   return (
     <>
-      <div className="leads-subsection-label">{isEs ? 'Tipos de lead' : 'Lead types'}</div>
+      <div className="leads-subsection-label">{t('leads.cpl.leadTypes')}</div>
       {l.cplLeads.map((row, i) => (
         <div key={i} className="leads-row-card">
           <button className="btn-remove" onClick={() => LAD('cplLeads', i)}>
@@ -12,7 +12,7 @@ export function CPLEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
           </button>
           <div className="two-col" style={{ marginBottom: '4px' }}>
             <div>
-              <div className="field-label">{isEs ? 'Tipo' : 'Type'}</div>
+              <div className="field-label">{t('leads.cpl.type')}</div>
               <input
                 type="text"
                 value={row.type}
@@ -20,7 +20,7 @@ export function CPLEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
               />
             </div>
             <div>
-              <div className="field-label">{isEs ? 'Precio' : 'Price'}</div>
+              <div className="field-label">{t('leads.cpl.price')}</div>
               <input
                 type="text"
                 value={row.price}
@@ -28,7 +28,7 @@ export function CPLEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
               />
             </div>
           </div>
-          <div className="field-label">{isEs ? 'Descripcion' : 'Description'}</div>
+          <div className="field-label">{t('leads.cpl.description')}</div>
           <textarea
             rows={2}
             value={row.desc}
@@ -38,42 +38,40 @@ export function CPLEditor({ l, LS, LAE, LAA, LAD, LSE, LSA, LSD, isEs }) {
       ))}
       <button
         className="btn-add"
-        onClick={() =>
-          LAA('cplLeads', { type: isEs ? 'Nuevo tipo' : 'New type', price: '€0', desc: '' })
-        }
+        onClick={() => LAA('cplLeads', { type: t('leads.cpl.newType'), price: '€0', desc: '' })}
       >
-        {isEs ? '+ Anadir tipo de lead' : '+ Add lead type'}
+        {t('leads.cpl.addType')}
       </button>
 
       <div className="leads-subsection-label" style={{ marginTop: '10px' }}>
-        {isEs ? 'Funcionalidades (pag. CPL)' : 'Features (CPL pg.)'}
+        {t('leads.cpl.features')}
       </div>
       <StringListEditor
         items={l.cplFeatures}
         onEdit={(i, v) => LSE('cplFeatures', i, v)}
         onAdd={() => LSA('cplFeatures')}
         onDel={(i) => LSD('cplFeatures', i)}
-        addLabel={isEs ? '+ Anadir funcionalidad' : '+ Add feature'}
+        addLabel={t('shared.addFeatureBtn')}
       />
 
       <div className="leads-subsection-label" style={{ marginTop: '10px' }}>
-        {isEs ? 'Ejemplo de calculo' : 'Calculation example'}
+        {t('leads.cpl.calcExample')}
       </div>
       <CalcEditor
         title={l.cplCalcTitle}
         text={l.cplCalcText}
         onTitleChange={(v) => LS('cplCalcTitle', v)}
         onTextChange={(v) => LS('cplCalcText', v)}
-        isEs={isEs}
+        t={t}
       />
 
-      <div className="leads-subsection-label">{isEs ? 'Notas (◆)' : 'Footnotes (◆)'}</div>
+      <div className="leads-subsection-label">{t('leads.cpl.notes')}</div>
       <StringListEditor
         items={l.cplNotes}
         onEdit={(i, v) => LSE('cplNotes', i, v)}
         onAdd={() => LSA('cplNotes')}
         onDel={(i) => LSD('cplNotes', i)}
-        addLabel={isEs ? '+ Anadir nota' : '+ Add note'}
+        addLabel={t('shared.addNoteBtn')}
       />
     </>
   );

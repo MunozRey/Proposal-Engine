@@ -1,25 +1,24 @@
-export function ContentTab({ st, dispatch }) {
-  const isEs = st.language === 'es';
+export function ContentTab({ st, dispatch, t }) {
   return (
     <div>
       <div className="field">
-        <div className="field-label">{isEs ? 'Texto intro (pag. 2)' : 'Intro text (pg. 2)'}</div>
+        <div className="field-label">{t('contentTab.introText')}</div>
         <textarea
           rows={3}
           value={st.introText}
-          placeholder={isEs ? 'Dejar vacio para texto por defecto' : 'Leave empty for default text'}
+          placeholder={t('contentTab.introPh')}
           onChange={(e) => dispatch({ t: 'SET', k: 'introText', v: e.target.value })}
         />
       </div>
 
       <div className="section-title">
-        <span>{isEs ? 'Pasos del proceso' : 'Process steps'}</span>
+        <span>{t('contentTab.processSteps')}</span>
       </div>
       {st.steps.map((s, i) => (
         <div key={i} className="step-card">
           <button
             className="btn-remove"
-            title={isEs ? 'Eliminar paso' : 'Remove step'}
+            title={t('contentTab.removeStep')}
             onClick={() => dispatch({ t: 'STEP_DEL', i })}
           >
             ✕
@@ -41,64 +40,63 @@ export function ContentTab({ st, dispatch }) {
         </div>
       ))}
       <button className="btn-add" onClick={() => dispatch({ t: 'STEP_ADD' })}>
-        {isEs ? '+ Anadir paso' : '+ Add step'}
+        {t('contentTab.addStep')}
       </button>
 
       <div className="section-title" style={{ marginTop: '16px' }}>
-        <span>{isEs ? 'Funcionalidades incluidas' : 'Features received'}</span>
+        <span>{t('contentTab.featuresIncluded')}</span>
       </div>
-      <div className="feat-grid">
-        <div>
-          <div className="field-label">{isEs ? 'Columna izquierda' : 'Left column'}</div>
-          {st.featuresL.map((f, i) => (
-            <div key={i} className="feat-item">
-              <textarea
-                rows={2}
-                value={f}
-                onChange={(e) => dispatch({ t: 'FEAT', side: 'featuresL', i, v: e.target.value })}
-              />
-              <button
-                className="btn-remove"
-                title={isEs ? 'Eliminar' : 'Remove'}
-                onClick={() => dispatch({ t: 'FEAT_DEL', side: 'featuresL', i })}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
+      <div className="field-hint" style={{ marginBottom: '8px' }}>
+        {t('contentTab.featuresHint')}
+      </div>
+
+      <div className="feat-subhead">
+        <span>{t('contentTab.leftCol')}</span>
+        <span className="feat-count">{st.featuresL.length}</span>
+      </div>
+      {st.featuresL.map((f, i) => (
+        <div key={`L-${i}`} className="feat-item">
+          <textarea
+            rows={2}
+            value={f}
+            onChange={(e) => dispatch({ t: 'FEAT', side: 'featuresL', i, v: e.target.value })}
+          />
           <button
-            className="btn-add"
-            onClick={() => dispatch({ t: 'FEAT_ADD', side: 'featuresL' })}
+            className="btn-remove"
+            title={t('contentTab.removeFeature')}
+            onClick={() => dispatch({ t: 'FEAT_DEL', side: 'featuresL', i })}
           >
-            {isEs ? '+ Anadir' : '+ Add'}
+            ✕
           </button>
         </div>
-        <div>
-          <div className="field-label">{isEs ? 'Columna derecha' : 'Right column'}</div>
-          {st.featuresR.map((f, i) => (
-            <div key={i} className="feat-item">
-              <textarea
-                rows={2}
-                value={f}
-                onChange={(e) => dispatch({ t: 'FEAT', side: 'featuresR', i, v: e.target.value })}
-              />
-              <button
-                className="btn-remove"
-                title={isEs ? 'Eliminar' : 'Remove'}
-                onClick={() => dispatch({ t: 'FEAT_DEL', side: 'featuresR', i })}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
+      ))}
+      <button className="btn-add" onClick={() => dispatch({ t: 'FEAT_ADD', side: 'featuresL' })}>
+        {t('contentTab.addLeft')}
+      </button>
+
+      <div className="feat-subhead" style={{ marginTop: '12px' }}>
+        <span>{t('contentTab.rightCol')}</span>
+        <span className="feat-count">{st.featuresR.length}</span>
+      </div>
+      {st.featuresR.map((f, i) => (
+        <div key={`R-${i}`} className="feat-item">
+          <textarea
+            rows={2}
+            value={f}
+            onChange={(e) => dispatch({ t: 'FEAT', side: 'featuresR', i, v: e.target.value })}
+          />
           <button
-            className="btn-add"
-            onClick={() => dispatch({ t: 'FEAT_ADD', side: 'featuresR' })}
+            className="btn-remove"
+            title={t('contentTab.removeFeature')}
+            onClick={() => dispatch({ t: 'FEAT_DEL', side: 'featuresR', i })}
           >
-            {isEs ? '+ Anadir' : '+ Add'}
+            ✕
           </button>
         </div>
-      </div>
+      ))}
+      <button className="btn-add" onClick={() => dispatch({ t: 'FEAT_ADD', side: 'featuresR' })}>
+        {t('contentTab.addRight')}
+      </button>
     </div>
   );
 }

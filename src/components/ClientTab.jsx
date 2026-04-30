@@ -3,7 +3,6 @@ import { CC_LOGO } from '../constants.js';
 import { fetchLogoFromDomain } from '../utils/logoFetch.js';
 
 export function ClientTab({ st, dispatch, t }) {
-  const isEs = st.language === 'es';
   const [logoUrl, setLogoUrl] = useState('');
   const [clientStatus, setClientStatus] = useState(null);
   const [clientLoading, setClientLoading] = useState(false);
@@ -31,16 +30,16 @@ export function ClientTab({ st, dispatch, t }) {
   return (
     <div>
       <div className="section-title">
-        <span>{isEs ? 'Datos del cliente' : 'Client data'}</span>
+        <span>{t('clientTab.dataTitle')}</span>
       </div>
       <div className="field">
         <div className="field-label">
-          {isEs ? 'Nombre del cliente' : 'Client name'} <span className="req">*</span>
+          {t('clientTab.clientName')} <span className="req">*</span>
         </div>
         <input
           type="text"
           value={st.clientName}
-          placeholder={isEs ? 'Nombre de tu empresa' : 'Your company name'}
+          placeholder={t('clientTab.clientNamePh')}
           className={!st.clientName.trim() ? 'input-warn' : ''}
           onChange={(e) => dispatch({ t: 'SET', k: 'clientName', v: e.target.value })}
         />
@@ -50,13 +49,11 @@ export function ClientTab({ st, dispatch, t }) {
       </div>
 
       <div className="field">
-        <div className="field-label">{isEs ? 'Logo del cliente' : 'Client logo'}</div>
+        <div className="field-label">{t('clientTab.clientLogo')}</div>
         <label className="upload-zone">
           <div className="upload-zone-icon">🖼</div>
           <div>
-            <div className="upload-zone-txt">
-              {isEs ? 'Subir logo del cliente' : 'Upload client logo'}
-            </div>
+            <div className="upload-zone-txt">{t('clientTab.uploadLogo')}</div>
             <div className="upload-zone-sub">PNG · SVG · JPG</div>
           </div>
           <input
@@ -67,12 +64,12 @@ export function ClientTab({ st, dispatch, t }) {
           />
         </label>
         <div style={{ marginTop: '6px' }}>
-          <div className="field-label">{isEs ? 'o buscar por dominio' : 'or search by domain'}</div>
+          <div className="field-label">{t('clientTab.orSearchDomain')}</div>
           <div className="logo-fetch">
             <input
               type="text"
               value={logoUrl}
-              placeholder={isEs ? 'tu-dominio.com' : 'your-domain.com'}
+              placeholder={t('clientTab.domainPh')}
               onChange={(e) => setLogoUrl(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') fetchClient();
@@ -96,13 +93,9 @@ export function ClientTab({ st, dispatch, t }) {
       </div>
 
       <div className="field">
-        <div className="field-label">
-          {isEs ? 'Logo de CreditCheck (fijo)' : 'CreditCheck logo (fixed)'}
-        </div>
+        <div className="field-label">{t('clientTab.ccLogo')}</div>
         <div className="field-hint" style={{ marginBottom: '6px' }}>
-          {isEs
-            ? 'La marca de CreditCheck está bloqueada por política de branding.'
-            : 'CreditCheck branding is locked by policy.'}
+          {t('clientTab.ccLogoLockedHint')}
         </div>
         <div className="upload-preview">
           <img
@@ -114,12 +107,22 @@ export function ClientTab({ st, dispatch, t }) {
       </div>
 
       <div className="field">
-        <div className="field-label">{isEs ? 'Fecha' : 'Date'}</div>
+        <div className="field-label">{t('clientTab.dateLabel')}</div>
         <input
           type="text"
           value={st.date}
-          placeholder={isEs ? 'Marzo 2026' : 'March 2026'}
+          placeholder={t('clientTab.datePh')}
           onChange={(e) => dispatch({ t: 'SET', k: 'date', v: e.target.value })}
+        />
+      </div>
+
+      <div className="field">
+        <div className="field-label">{t('clientTab.proposalNumber')}</div>
+        <input
+          type="text"
+          value={st.proposalNumber || ''}
+          placeholder="CC-2026-0001"
+          onChange={(e) => dispatch({ t: 'SET', k: 'proposalNumber', v: e.target.value })}
         />
       </div>
     </div>

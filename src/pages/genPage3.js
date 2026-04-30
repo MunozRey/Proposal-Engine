@@ -13,75 +13,73 @@ import {
   leadStr,
   bulletItem,
 } from '../utils/pageHelpers.js';
+import { t } from '../i18n/translate.js';
 
 export function genPage3(st, pageNum = '02') {
   const { N, B, A } = getColors(st);
-  const isEs = st.language === 'es';
+  const lang = st.language || 'en';
+  const tt = (k, v) => t(lang, k, v);
 
-  const plans = (st.plans || []).map((pl) => planCard(pl, st, isEs)).join('');
+  const plans = (st.plans || []).map((pl) => planCard(pl, st, tt)).join('');
 
+  // Branded-screens line: client name is interpolated as raw HTML downstream
+  // (bulletItem doesn't escape), so esc() the client name before interpolation.
+  const brandedClient = esc(st.clientName || tt('pagePricing.brandedScreensClientFallback'));
   const setupFeats = [
-    (isEs ? 'Pantallas con marca de ' : 'Branded screens for ') +
-      esc(st.clientName || (isEs ? 'cliente' : 'client')),
-    isEs ? 'Producción + sandbox' : 'Production + sandbox',
-    isEs ? 'API REST documentada' : 'Documented REST API',
-    isEs ? 'Soporte durante la integración' : 'Integration support',
+    tt('pagePricing.brandedScreens', { client: brandedClient }),
+    tt('pagePricing.prodSandbox'),
+    tt('pagePricing.documentedApi'),
+    tt('pagePricing.integrationSupport'),
   ];
 
   return `
 <div style="width:595px;height:842px;background:linear-gradient(180deg, #FAFCFF 0%, #F5F8FF 100%);position:relative;overflow:hidden;font-family:${FONTS.SANS}">
-  ${hdrStr(pageNum, isEs ? 'Modelos de Precio' : 'Pricing Models', st)}
+  ${hdrStr(pageNum, tt('pagePricing.headerTitle'), st)}
 
   <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
-    ${eyebrowStr(isEs ? 'Tarificación' : 'Pricing')}
-    ${titleStr(isEs ? 'Implementación + suscripción mensual' : 'Implementation + monthly subscription', N, 22)}
+    ${eyebrowStr(tt('pagePricing.eyebrow'))}
+    ${titleStr(tt('pagePricing.heading'), N, 22)}
     <div style="height:12px"></div>
-    ${leadStr(
-      isEs
-        ? 'Una tarifa única de implementación más una suscripción mensual con verificaciones incluidas.'
-        : 'A one-time implementation fee plus a monthly subscription that includes verifications.',
-      '#3D5166',
-      11
-    )}
+    ${leadStr(tt('pagePricing.lead'), '#3D5166', 11)}
 
     <!-- setup card -->
     <div style="background:${N};border-radius:12px;padding:16px 20px;margin-top:18px;font-family:${FONTS.SANS};display:flex;justify-content:space-between;align-items:flex-start;gap:18px">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <span style="width:5px;height:5px;border-radius:50%;background:${A}"></span>
-          <span style="font-size:9px;color:rgba(255,255,255,.9);letter-spacing:0.1em;text-transform:uppercase;font-family:${FONTS.MONO};font-weight:700">${isEs ? 'Pago único' : 'One-time'}</span>
+          <span style="font-size:9px;color:rgba(255,255,255,.9);letter-spacing:0.1em;text-transform:uppercase;font-family:${FONTS.MONO};font-weight:700">${esc(tt('pagePricing.oneTime'))}</span>
         </div>
-        <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px;letter-spacing:-0.01em">${esc(isEs ? 'Desarrollo e implementación white-label' : 'White-label development and implementation')}</div>
+        <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px;letter-spacing:-0.01em">${esc(tt('pagePricing.setupHeading'))}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">
           ${setupFeats.map((f) => bulletItem(f, '#FFFFFF', st)).join('')}
         </div>
       </div>
       <div style="text-align:right;flex-shrink:0">
-        <div style="font-family:${FONTS.SERIF};font-size:26px;font-weight:600;color:#fff;letter-spacing:-0.02em;line-height:1">${esc(st.setupFee || (isEs ? 'A medida' : 'Custom'))}</div>
+        <div style="font-family:${FONTS.SERIF};font-size:26px;font-weight:600;color:#fff;letter-spacing:-0.02em;line-height:1">${esc(st.setupFee || tt('pagePricing.custom'))}</div>
       </div>
     </div>
 
     <!-- subscription header -->
     <div style="margin-top:24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
       <div>
-        <div style="font-family:${FONTS.MONO};font-size:8.5px;font-weight:600;letter-spacing:0.14em;color:${B};text-transform:uppercase;margin-bottom:4px">${isEs ? 'Suscripción SaaS' : 'SaaS subscription'}</div>
-        <div style="font-family:${FONTS.SERIF};font-size:18px;font-weight:600;color:${N};letter-spacing:-0.015em;line-height:1.1">${isEs ? 'Cuatro planes mensuales' : 'Four monthly plans'}</div>
+        <div style="font-family:${FONTS.MONO};font-size:8.5px;font-weight:600;letter-spacing:0.14em;color:${B};text-transform:uppercase;margin-bottom:4px">${esc(tt('pagePricing.saasSubscription'))}</div>
+        <div style="font-family:${FONTS.SERIF};font-size:18px;font-weight:600;color:${N};letter-spacing:-0.015em;line-height:1.1">${esc(tt('pagePricing.fourPlans'))}</div>
       </div>
-    <div style="font-size:10px;color:#4C6078;line-height:1.45;max-width:240px;text-align:right">${isEs ? 'Verificaciones incluidas · Precio fijo por verificación adicional' : 'Verifications included · Fixed price per additional verification'}</div>
+    <div style="font-size:10px;color:#4C6078;line-height:1.45;max-width:240px;text-align:right">${esc(tt('pagePricing.subscriptionLead'))}</div>
     </div>
 
     <!-- plans grid -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">${plans}</div>
 
     <!-- footnote -->
-    <div style="margin-top:14px;font-size:9.5px;color:#4C6078;line-height:1.5;font-style:italic">${isEs ? 'El plan Growth ofrece el mejor equilibrio coste/volumen para una fase piloto. Custom incluye condiciones negociadas.' : 'Growth offers the best cost/volume balance for a pilot. Custom includes negotiated terms.'}</div>
+    <div style="margin-top:14px;font-size:9.5px;color:#4C6078;line-height:1.5;font-style:italic">${esc(tt('pagePricing.footnote'))}</div>
   </div>
 
   ${ftrStr(st)}
 </div>`;
 }
 
-function planCard(pl, st, isEs) {
+function planCard(pl, st, tt) {
   const { N, B, A } = getColors(st);
   const rec = !!pl.rec;
   const recNeedsDarkText = rec && isLightColor(N);
@@ -101,7 +99,7 @@ function planCard(pl, st, isEs) {
   const accentText = rec ? (recNeedsDarkText ? '#0F1E30' : N) : B;
 
   const recPill = rec
-    ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:${A};color:#0F1E30;font-family:${FONTS.SANS};font-size:8.5px;font-weight:700;letter-spacing:0.08em;padding:4px 11px;border-radius:9999px;text-transform:uppercase;white-space:nowrap;box-shadow:0 4px 10px rgba(255,204,0,.45)">★ ${esc(isEs ? 'Recomendado' : 'Most popular')}</div>`
+    ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:${A};color:#0F1E30;font-family:${FONTS.SANS};font-size:8.5px;font-weight:700;letter-spacing:0.08em;padding:4px 11px;border-radius:9999px;text-transform:uppercase;white-space:nowrap;box-shadow:0 4px 10px rgba(255,204,0,.45)">★ ${esc(tt('pagePricing.mostPopular'))}</div>`
     : '';
 
   return `
@@ -117,12 +115,12 @@ function planCard(pl, st, isEs) {
       <span style="width:4px;height:4px;border-radius:50%;background:${accentText}"></span>
       <span style="font-family:${FONTS.MONO};font-size:10px;font-weight:700;color:${accentText}">${esc(pl.verifs || '')}</span>
     </div>
-    <div style="font-size:10.5px;color:${dimColor};margin-bottom:14px;font-weight:800">${esc(isEs ? 'verif./mes' : 'verif./mo')}</div>
+    <div style="font-size:10.5px;color:${dimColor};margin-bottom:14px;font-weight:800">${esc(tt('pagePricing.verifPerMonth'))}</div>
 
-    <div style="font-family:${FONTS.SANS};font-size:9.5px;color:${dimColor};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;font-weight:900">${esc(isEs ? 'Coste medio' : 'Avg. cost')}</div>
+    <div style="font-family:${FONTS.SANS};font-size:9.5px;color:${dimColor};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;font-weight:900">${esc(tt('pagePricing.avgCost'))}</div>
     <div style="font-family:${FONTS.MONO};font-size:13px;font-weight:700;color:${valueColor};margin-bottom:12px;font-variant-numeric:tabular-nums">${esc(pl.avg || '')}</div>
 
-    <div style="font-family:${FONTS.SANS};font-size:9.5px;color:${dimColor};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;font-weight:900">${esc(isEs ? 'Verif. extra' : 'Extra verif.')}</div>
+    <div style="font-family:${FONTS.SANS};font-size:9.5px;color:${dimColor};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;font-weight:900">${esc(tt('pagePricing.extraVerif'))}</div>
     <div style="font-family:${FONTS.MONO};font-size:11px;font-weight:700;color:${valueColor};font-variant-numeric:tabular-nums">${esc(pl.extra || '')}</div>
   </div>`;
 }

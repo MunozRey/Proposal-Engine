@@ -14,33 +14,31 @@ import {
   eyebrowStr,
   titleStr,
   leadStr,
+  pricePillStr,
 } from '../../utils/pageHelpers.js';
-
-const ACCENT = '#005EFF';
+import { t } from '../../i18n/translate.js';
 
 export function genLeadsCPL(st, pageNum = '02') {
-  const { N } = getColors(st);
-  const isEs = st.language === 'es';
+  const { N, B } = getColors(st);
+  const ACCENT = B; // CPL accent = brand blue
+  const lang = st.language || 'en';
+  const tt = (k, v) => t(lang, k, v);
   const l = st.leads || {};
 
-  const intro =
-    l.cplIntro ||
-    (isEs
-      ? 'Fee fijo por lead entregado con Open Banking completado. Precio predecible sin riesgo de conversión.'
-      : 'Fixed fee per delivered lead with completed Open Banking. Predictable pricing with no conversion risk.');
+  const intro = l.cplIntro || tt('leadsCPL.introDefault');
 
   const table = tableStr(
     [
-      { label: isEs ? 'Tipo de lead' : 'Lead type', width: '32%' },
-      { label: isEs ? 'Precio' : 'Price', align: 'center', width: '18%' },
-      { label: isEs ? 'Incluye' : 'Includes' },
+      { label: tt('leadsCPL.colLeadType'), width: '32%' },
+      { label: tt('leadsCPL.colPrice'), align: 'center', width: '18%' },
+      { label: tt('leadsCPL.colIncludes') },
     ],
     (l.cplLeads || []).map((row) => [
       {
         html: `<span style="font-weight:600;color:${N}">${esc(row.type)}</span>`,
       },
       {
-        html: `<span style="display:inline-block;background:${ACCENT};color:#fff;font-family:${FONTS.MONO};font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px">${esc(row.price)}</span>`,
+        html: pricePillStr(row.price, st, 'blue'),
         style: 'text-align:center',
       },
       {
@@ -52,19 +50,19 @@ export function genLeadsCPL(st, pageNum = '02') {
 
   return `
 <div style="width:595px;height:842px;background:#FAFBFD;position:relative;overflow:hidden;font-family:${FONTS.SANS}">
-  ${hdrStr(pageNum, isEs ? 'Modelo CPL' : 'CPL Model', st)}
+  ${hdrStr(pageNum, tt('leadsCPL.headerTitle'), st)}
 
   <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
-    ${eyebrowStr(isEs ? 'Coste por Lead' : 'Cost per Lead', ACCENT)}
-    ${titleStr(isEs ? 'Modelo CPL — fee fijo por lead' : 'CPL Model — fixed fee per lead', N, 22)}
+    ${eyebrowStr(tt('leadsCPL.eyebrow'), ACCENT)}
+    ${titleStr(tt('leadsCPL.heading'), N, 22)}
     <div style="height:12px"></div>
     ${leadStr(intro, '#3D5166', 11)}
 
     <div style="margin-top:18px">${table}</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
-      ${calcBoxStr(l.cplCalcTitle || (isEs ? 'Ejemplo de cálculo' : 'Calculation example'), l.cplCalcText, st)}
-      ${featureBoxStr(isEs ? 'Qué incluye cada lead' : 'What each lead includes', l.cplFeatures || [], st)}
+      ${calcBoxStr(l.cplCalcTitle || tt('leadsCPL.calcTitle'), l.cplCalcText, st)}
+      ${featureBoxStr(tt('leadsCPL.featuresTitle'), l.cplFeatures || [], st)}
     </div>
 
     ${notesStr(l.cplNotes, st)}

@@ -39,7 +39,7 @@ describe('translate', () => {
     expect(t('en', 'close.validityLabel', { date: '2026-12-31' })).toBe(
       'This proposal is valid until 2026-12-31'
     );
-    expect(t('es', 'close.ctaSubject', { client: 'Ebury' })).toBe('Aceptar propuesta — Ebury');
+    expect(t('es', 'close.ctaSubject', { client: 'Ebury' })).toBe('Aceptar propuesta · Ebury');
   });
 
   it('leaves missing vars as {placeholder}', () => {

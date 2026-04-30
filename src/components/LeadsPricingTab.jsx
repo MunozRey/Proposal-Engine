@@ -15,13 +15,12 @@ function Section({ title, open, onToggle, children }) {
   );
 }
 
-export function LeadsPricingTab({ st, dispatch }) {
-  const isEs = st.language === 'es';
+export function LeadsPricingTab({ st, dispatch, t }) {
   const l = st.leads;
   const [open, setOpen] = useState({ cpl: true, cpa: false, hyb: false });
   const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }));
 
-  // Dispatch helpers — passed down to sub-editors
+  // Dispatch helpers, passed down to sub-editors
   const LS = (k, v) => dispatch({ t: 'LEADS_SET', k, v });
   const LAE = (arr, i, f, v) => dispatch({ t: 'LEADS_ARR_EDIT', arr, i, f, v });
   const LAA = (arr, item) => dispatch({ t: 'LEADS_ARR_ADD', arr, item });
@@ -33,7 +32,7 @@ export function LeadsPricingTab({ st, dispatch }) {
   return (
     <div>
       <Section
-        title={isEs ? 'CPL — Coste por Lead' : 'CPL — Cost per Lead'}
+        title={t('leads.pricingTab.cplTitle')}
         open={open.cpl}
         onToggle={() => toggle('cpl')}
       >
@@ -46,12 +45,12 @@ export function LeadsPricingTab({ st, dispatch }) {
           LSE={LSE}
           LSA={LSA}
           LSD={LSD}
-          isEs={isEs}
+          t={t}
         />
       </Section>
 
       <Section
-        title={isEs ? 'CPA — Coste por Adquisicion' : 'CPA — Cost per Acquisition'}
+        title={t('leads.pricingTab.cpaTitle')}
         open={open.cpa}
         onToggle={() => toggle('cpa')}
       >
@@ -64,16 +63,16 @@ export function LeadsPricingTab({ st, dispatch }) {
           LSE={LSE}
           LSA={LSA}
           LSD={LSD}
-          isEs={isEs}
+          t={t}
         />
       </Section>
 
       <Section
-        title={isEs ? 'Hibrido — CPL + CPA' : 'Hybrid — CPL + CPA'}
+        title={t('leads.pricingTab.hybridTitle')}
         open={open.hyb}
         onToggle={() => toggle('hyb')}
       >
-        <HybridEditor l={l} LS={LS} LSE={LSE} LSA={LSA} LSD={LSD} isEs={isEs} />
+        <HybridEditor l={l} LS={LS} LSE={LSE} LSA={LSA} LSD={LSD} t={t} />
       </Section>
     </div>
   );

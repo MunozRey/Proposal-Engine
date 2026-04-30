@@ -12,7 +12,6 @@ import { LeadsContentTab } from './components/LeadsContentTab.jsx';
 import { LeadsPricingTab } from './components/LeadsPricingTab.jsx';
 import { StyleTab } from './components/StyleTab.jsx';
 import { ProposalManager } from './components/ProposalManager.jsx';
-import { PagesTab } from './components/PagesTab.jsx';
 import { PageCard } from './components/PageCard.jsx';
 import { exportPDF } from './utils/exportPdf.js';
 import { exportHtml } from './utils/exportHtml.js';
@@ -24,7 +23,6 @@ import { genLeadsOverview } from './pages/leads/genLeadsOverview.js';
 import { genLeadsCPL } from './pages/leads/genLeadsCPL.js';
 import { genLeadsCPA } from './pages/leads/genLeadsCPA.js';
 import { genLeadsHybrid } from './pages/leads/genLeadsHybrid.js';
-import { genWhyCC } from './pages/genWhyCC.js';
 import { t, listLocales, normalizeLang } from './i18n/translate.js';
 import { EditorShell } from './components/editor/EditorShell.jsx';
 import { CommandPalette } from './components/editor/CommandPalette.jsx';
@@ -34,9 +32,9 @@ import { icon as svgIcon } from './design/icons.js';
 import { enforceCreditcheckBrand } from './design/brandLock.js';
 import { ensureSingleRecommendedPlan } from './utils/plans.js';
 
-const TABS_WL = ['client', 'content', 'pricing', 'pages', 'style', 'save'];
-const TABS_LEADS = ['client', 'content', 'pricing', 'pages', 'style', 'save'];
-const TABS_COMBO = ['client', 'content', 'pricing', 'leadsP', 'pages', 'style', 'save'];
+const TABS_WL = ['client', 'content', 'pricing', 'style', 'save'];
+const TABS_LEADS = ['client', 'content', 'pricing', 'style', 'save'];
+const TABS_COMBO = ['client', 'content', 'pricing', 'leadsP', 'style', 'save'];
 
 const savedState = loadState();
 const initialState = ensureSingleRecommendedPlan(
@@ -61,12 +59,14 @@ function App() {
   const [exportingDocx, setExportingDocx] = useState(false);
   const [toast, setToast] = useState(null);
   const [lastExportJson, setLastExportJson] = useState(null);
-  const [sidebarW, setSidebarW] = useState(360);
+  // Panel fijo al 30 % del viewport por petición explícita del usuario.
+  // Se mantiene un mínimo de 360 px (legibilidad) y un máximo de 640 px
+  // (para que en monitores grandes no se coma media pantalla).
+  const sidebarW = 'clamp(360px, 30vw, 640px)';
   const [cmdOpen, setCmdOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState('saved');
   const rightRef = useRef(null);
-  const dragging = useRef(false);
 
   useEffect(() => {
     setSaveStatus('saving');
@@ -74,6 +74,27 @@ function App() {
     const id = setTimeout(() => setSaveStatus('saved'), 600);
     return () => clearTimeout(id);
   }, [st]);
+
+  // Auto-grow every textarea inside the editor shell so users never have to drag
+  // a corner handle. Runs on input + when state changes (covers programmatic
+  // updates from undo/redo and template loads). Excludes textareas opted out
+  // via data-allow-resize="true".
+  useEffect(() => {
+    const fit = (ta) => {
+      if (!ta || ta.dataset.allowResize === 'true') return;
+      ta.style.height = 'auto';
+      ta.style.height = Math.max(38, ta.scrollHeight) + 'px';
+    };
+    const fitAll = () => {
+      document.querySelectorAll('#ed-shell textarea').forEach(fit);
+    };
+    fitAll();
+    const onInput = (e) => {
+      if (e.target instanceof HTMLTextAreaElement) fit(e.target);
+    };
+    document.addEventListener('input', onInput, true);
+    return () => document.removeEventListener('input', onInput, true);
+  }, [st, tab]);
 
   // Pre-load Larken weights so the cover and titles render in serif from the
   // first paint instead of swapping mid-export and breaking html2canvas captures.
@@ -133,24 +154,6 @@ function App() {
     showToast(`✓ ${t(lang, 'app.toastPrintReady')}`);
   }, [lang, showToast]);
 
-  /* ── Sidebar resize drag ─────────────────────────── */
-  const onDragStart = useCallback((e) => {
-    e.preventDefault();
-    dragging.current = true;
-    const move = (ev) => {
-      if (!dragging.current) return;
-      const x = ev.clientX;
-      setSidebarW(Math.max(280, Math.min(560, x)));
-    };
-    const up = () => {
-      dragging.current = false;
-      window.removeEventListener('mousemove', move);
-      window.removeEventListener('mouseup', up);
-    };
-    window.addEventListener('mousemove', move);
-    window.addEventListener('mouseup', up);
-  }, []);
-
   const calcZoom = useCallback(() => {
     if (!rightRef.current || !autoFit) return;
     const w = rightRef.current.offsetWidth;
@@ -197,17 +200,18 @@ function App() {
   const tabsDef = isCombo ? TABS_COMBO : isLeads ? TABS_LEADS : TABS_WL;
 
   /* ── Tab labels via i18n ─────────────────────────── */
+  // In Combo there are TWO pricing tabs: "pricing" (White-Label) and "leadsP" (Leads).
+  // Use compact labels "WL" / "Leads" for that case so they fit in the 7-column grid.
   const tabLabels = useMemo(
     () => ({
       client: t(lang, 'tabs.client'),
       content: t(lang, 'tabs.content'),
-      pricing: t(lang, 'tabs.pricing'),
-      leadsP: t(lang, 'tabs.leadsPricing'),
-      pages: t(lang, 'tabs.pages'),
+      pricing: pType === 'combo' ? 'WL' : t(lang, 'tabs.pricing'),
+      leadsP: t(lang, 'proposalType.leads'),
       style: t(lang, 'tabs.style'),
       save: t(lang, 'tabs.save'),
     }),
-    [lang]
+    [lang, pType]
   );
 
   /* ── Completion estimation per tab (for the dot badge) ── */
@@ -243,15 +247,9 @@ function App() {
 
   /* ── Dynamic page numbering ──────────────────────── */
   const allPageDefs = useMemo(() => {
-    const whyCC = {
-      id: 'whyCC',
-      baseLabel: t(lang, 'pageTitles.whyCC'),
-      gen: (n) => genWhyCC(st, n),
-    };
     if (pType === 'combo') {
       return [
         { id: 'cover', baseLabel: t(lang, 'pageTitles.cover'), gen: () => genPage1(st) },
-        whyCC,
         { id: 'how', baseLabel: t(lang, 'pageTitles.howItWorks'), gen: (n) => genPage2(st, n) },
         { id: 'pricing', baseLabel: t(lang, 'pageTitles.wlPricing'), gen: (n) => genPage3(st, n) },
         {
@@ -271,7 +269,6 @@ function App() {
     if (pType === 'leads') {
       return [
         { id: 'cover', baseLabel: t(lang, 'pageTitles.cover'), gen: () => genPage1(st) },
-        whyCC,
         {
           id: 'overview',
           baseLabel: t(lang, 'pageTitles.overview'),
@@ -288,7 +285,6 @@ function App() {
     }
     return [
       { id: 'cover', baseLabel: t(lang, 'pageTitles.cover'), gen: () => genPage1(st) },
-      whyCC,
       { id: 'how', baseLabel: t(lang, 'pageTitles.howItWorks'), gen: (n) => genPage2(st, n) },
       { id: 'pricing', baseLabel: t(lang, 'pageTitles.pricing'), gen: (n) => genPage3(st, n) },
     ];
@@ -302,7 +298,7 @@ function App() {
       const num = String(idx).padStart(2, '0');
       return {
         id: p.id,
-        label: `${lang === 'en' ? 'Pg.' : 'Pag.'} ${idx + 1} — ${p.baseLabel}`,
+        label: `${lang === 'en' ? 'Pg.' : 'Pag.'} ${idx + 1} · ${p.baseLabel}`,
         html: p.gen(num),
       };
     });
@@ -318,7 +314,7 @@ function App() {
       const num = String(contentIdx).padStart(2, '0');
       return {
         id: p.id,
-        label: `${lang === 'en' ? 'Pg.' : 'Pag.'} ${contentIdx + 1} — ${p.baseLabel}`,
+        label: `${lang === 'en' ? 'Pg.' : 'Pag.'} ${contentIdx + 1} · ${p.baseLabel}`,
         html: p.gen(num),
       };
     });
@@ -592,10 +588,17 @@ function App() {
         generatingLabel={t(lang, 'app.generating')}
         generatingHtmlLabel={t(lang, 'app.generatingHtml')}
         generatingDocxLabel={t(lang, 'app.generatingDocx')}
-        ctrlEHint={t(lang, 'app.downloadsAsPdf')}
-        ctrlShiftEHint={t(lang, 'app.downloadsAsHtml')}
-        ctrlAltEHint={t(lang, 'app.downloadsAsDocx')}
-        ctrlPHint={t(lang, 'app.opensPrint')}
+        progressLabel={t(lang, 'app.progressSection')}
+        fieldsLabel={t(lang, 'app.progressFieldsLabel')}
+        zoomLabel={t(lang, 'app.zoomSection')}
+        autoFitLabel={t(lang, 'app.zoomAuto')}
+        manualLabel={t(lang, 'app.zoomManual')}
+        autoFitHint={t(lang, 'app.fitHint')}
+        exportSectionLabel={t(lang, 'app.exportSection')}
+        unsavedHint={t(lang, 'app.unsavedHint')}
+        completeStatusLabel={t(lang, 'app.statusComplete')}
+        partialStatusLabel={t(lang, 'app.statusPartial')}
+        emptyStatusLabel={t(lang, 'app.statusEmpty')}
         undoTitle={t(lang, 'app.undo')}
         redoTitle={t(lang, 'app.redo')}
         shortcutsTitle={t(lang, 'app.keyboardShortcuts')}
@@ -629,7 +632,6 @@ function App() {
           {tab === 'leadsP' && (
             <LeadsPricingTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />
           )}
-          {tab === 'pages' && <PagesTab st={st} dispatch={dispatch} t={(k) => t(lang, k)} />}
           {tab === 'style' && (
             <StyleTab st={st} dispatch={dispatch} allPages={allPages} t={(k) => t(lang, k)} />
           )}
@@ -643,8 +645,6 @@ function App() {
           )}
         </div>
       </EditorShell>
-
-      {!collapsed && <div className="ed-resize" onMouseDown={onDragStart} />}
 
       <div id="right" ref={rightRef}>
         <div id="preview-label">{t(lang, 'app.preview')}</div>

@@ -1,12 +1,13 @@
-// Cover page — strong CreditCheck identity, no duplicate "Prepared for".
-//   • Big white wordmark top-left + yellow accent stripe on left edge
-//   • Two-line serif title (was three — line 3 was redundant)
-//   • Glassmorphism client card directly under the title
-//   • One info row at the bottom (Date · Proposal nº)
-//   • Big geometric mark watermark (lower-right) for brand presence
+// Cover page: strong CreditCheck identity, no duplicate "Prepared for".
+//   - Big white wordmark top-left + yellow accent stripe on left edge
+//   - Two-line serif title (line 3 was redundant)
+//   - Glassmorphism client card directly under the title
+//   - One info row at the bottom (Date + Proposal nº)
+//   - Big geometric mark watermark (lower-right) for brand presence
 
 import { esc } from '../utils/esc.js';
 import { getColors, FONTS, logoStr, logoMark } from '../utils/pageHelpers.js';
+import { t } from '../i18n/translate.js';
 
 export function genPage1(st) {
   const { N, B, A } = getColors(st);
@@ -15,9 +16,10 @@ export function genPage1(st) {
   const subtleText = 'rgba(15,30,48,.55)';
   const watermarkOpacity = '.08';
   const logoMode = 'light';
-  const isEs = st.language === 'es';
-  const dateLabel = isEs ? 'Fecha' : 'Date';
-  const proposalLabel = isEs ? 'Propuesta nº' : 'Proposal nº';
+  const lang = st.language || 'en';
+  const tt = (k, v) => t(lang, k, v);
+  const dateLabel = tt('cover.date');
+  const proposalLabel = tt('cover.proposalNo');
   const proposalNumber =
     st.proposalNumber ||
     `CC-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')}`;
@@ -47,7 +49,7 @@ export function genPage1(st) {
 
   <!-- Bottom strip: date + proposal nº -->
   <div style="position:absolute;left:42px;right:42px;bottom:78px;display:flex;justify-content:space-between;align-items:flex-end;background:#FFFFFF;border:1px solid rgba(10,18,100,.12);border-radius:12px;padding:16px 18px;box-shadow:0 10px 20px rgba(10,18,100,.06)">
-    ${cellStr(dateLabel, st.date || formatToday(isEs))}
+    ${cellStr(dateLabel, st.date || formatToday(lang))}
     ${cellStr(proposalLabel, proposalNumber, true)}
   </div>
 
@@ -67,8 +69,8 @@ function cellStr(label, value, alignRight = false) {
   </div>`;
 }
 
-function formatToday(isEs) {
-  return new Intl.DateTimeFormat(isEs ? 'es' : 'en', {
+function formatToday(lang) {
+  return new Intl.DateTimeFormat(lang, {
     month: 'long',
     year: 'numeric',
   }).format(new Date());

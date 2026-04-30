@@ -7,7 +7,6 @@ import { INIT } from '../state/initialState.js';
 import { genPage1 } from './genPage1.js';
 import { genPage2 } from './genPage2.js';
 import { genPage3 } from './genPage3.js';
-import { genWhyCC } from './genWhyCC.js';
 import { genLeadsOverview } from './leads/genLeadsOverview.js';
 import { genLeadsCPL } from './leads/genLeadsCPL.js';
 import { genLeadsCPA } from './leads/genLeadsCPA.js';
@@ -17,7 +16,6 @@ const PAGES = {
   cover: () => genPage1(INIT),
   howItWorks: () => genPage2(INIT, '01'),
   pricing: () => genPage3(INIT, '02'),
-  whyCC: () => genWhyCC(INIT, '03'),
   leadsOverview: () => genLeadsOverview(INIT, '01'),
   leadsCPL: () => genLeadsCPL(INIT, '02'),
   leadsCPA: () => genLeadsCPA(INIT, '03'),
@@ -78,11 +76,11 @@ describe('page generators (smoke)', () => {
     expect(html.toLowerCase()).toMatch(/most popular|recomendado/);
   });
 
-  it('leads overview surfaces all three model accents', () => {
-    const html = genLeadsOverview(INIT, '01');
-    // CPL = blue, CPA = mint, Hybrid = violet
-    expect(html.toUpperCase()).toContain('#005EFF');
-    expect(html.toUpperCase()).toContain('#22D3A0');
-    expect(html.toUpperCase()).toContain('#7C5CFF');
+  it('leads overview surfaces all three model accents using the brand palette', () => {
+    const html = genLeadsOverview(INIT, '01').toUpperCase();
+    // Brand-only palette: blue (CPL), yellow (CPA), navy (Hybrid).
+    expect(html).toContain('#005EFF');
+    expect(html).toContain('#FFCC00');
+    expect(html).toContain('#0A1264');
   });
 });

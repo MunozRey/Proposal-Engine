@@ -3,39 +3,28 @@
 
 import { esc } from '../utils/esc.js';
 import { hdrStr, ftrStr, getColors, FONTS, eyebrowStr, titleStr } from '../utils/pageHelpers.js';
-
-const DEFAULT_STEPS_EN = [
-  {
-    title: 'Sign',
-    desc: 'Accept this proposal via email — we counter-sign within one business day.',
-  },
-  { title: 'Onboard', desc: 'Kickoff call, sandbox access and shared Slack channel within 48h.' },
-  {
-    title: 'Go-live',
-    desc: 'Production verification within ~2 weeks, depending on your QA cycle.',
-  },
-];
-
-const DEFAULT_STEPS_ES = [
-  { title: 'Firma', desc: 'Acepta la propuesta por email — contrafirmamos en un día laborable.' },
-  { title: 'Onboarding', desc: 'Kickoff, acceso a sandbox y canal Slack compartido en 48h.' },
-  { title: 'Go-live', desc: 'Verificación en producción en ~2 semanas, según tu ciclo de QA.' },
-];
+import { t } from '../i18n/translate.js';
 
 export function genClose(st, pageNum = '99') {
   const { N, B, A } = getColors(st);
-  const isEs = st.language === 'es';
+  const lang = st.language || 'en';
+  const tt = (k, v) => t(lang, k, v);
 
-  const steps = st.closeSteps?.length ? st.closeSteps : isEs ? DEFAULT_STEPS_ES : DEFAULT_STEPS_EN;
+  const defaultSteps = [
+    { title: tt('pageClose.defaultStep1Title'), desc: tt('pageClose.defaultStep1Desc') },
+    { title: tt('pageClose.defaultStep2Title'), desc: tt('pageClose.defaultStep2Desc') },
+    { title: tt('pageClose.defaultStep3Title'), desc: tt('pageClose.defaultStep3Desc') },
+  ];
+  const steps = st.closeSteps?.length ? st.closeSteps : defaultSteps;
 
   const contact = st.contact || {};
   const contactName = contact.name || 'Sales · CreditCheck';
-  const contactRole = contact.role || (isEs ? 'Equipo comercial' : 'Sales team');
+  const contactRole = contact.role || tt('pageClose.salesTeam');
   const contactEmail = contact.email || 'sales@creditchecker.io';
   const contactPhone = contact.phone || '';
 
-  const validUntil = st.validUntil || formatValidity(isEs);
-  const subject = `${isEs ? 'Aceptar propuesta' : 'Accept proposal'} — ${st.clientName || ''}`;
+  const validUntil = st.validUntil || formatValidity(lang);
+  const subject = `${tt('pageClose.subject')} · ${st.clientName || ''}`;
   const ctaHref = `mailto:${encodeURIComponent(contactEmail)}?subject=${encodeURIComponent(subject)}`;
 
   const stepsHtml = steps
@@ -53,11 +42,11 @@ export function genClose(st, pageNum = '99') {
 
   return `
 <div style="width:595px;height:842px;background:linear-gradient(180deg, #FAFCFF 0%, #F5F8FF 100%);position:relative;overflow:hidden;font-family:${FONTS.SANS}">
-  ${hdrStr(pageNum, isEs ? 'Siguientes pasos' : 'Next steps', st)}
+  ${hdrStr(pageNum, tt('pageClose.headerTitle'), st)}
 
   <div style="position:absolute;top:60px;left:42px;right:42px;font-family:inherit">
-    ${eyebrowStr(isEs ? 'Siguientes pasos' : 'Next steps')}
-    ${titleStr(isEs ? 'Listos cuando tú lo estés' : 'Ready when you are', N, 22)}
+    ${eyebrowStr(tt('pageClose.eyebrow'))}
+    ${titleStr(tt('pageClose.heading'), N, 22)}
 
     <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:22px">
       <!-- Steps timeline -->
@@ -69,7 +58,7 @@ export function genClose(st, pageNum = '99') {
       <div style="background:${N};border-radius:12px;padding:16px 18px;color:#fff;font-family:${FONTS.SANS}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <span style="width:5px;height:5px;border-radius:50%;background:${A}"></span>
-          <span style="font-family:${FONTS.MONO};font-size:9px;color:rgba(255,255,255,.9);letter-spacing:0.12em;text-transform:uppercase;font-weight:700">${isEs ? 'Tu contacto' : 'Your contact'}</span>
+          <span style="font-family:${FONTS.MONO};font-size:9px;color:rgba(255,255,255,.9);letter-spacing:0.12em;text-transform:uppercase;font-weight:700">${esc(tt('pageClose.contactLabel'))}</span>
         </div>
         <div style="font-family:${FONTS.SERIF};font-size:18px;font-weight:600;letter-spacing:-0.01em;margin-bottom:3px">${esc(contactName)}</div>
         <div style="font-size:9.5px;color:rgba(255,255,255,.92);margin-bottom:14px;font-weight:600">${esc(contactRole)}</div>
@@ -82,21 +71,21 @@ export function genClose(st, pageNum = '99') {
     <div style="display:flex;align-items:center;justify-content:space-between;background:${A}1A;border:1px solid ${A}44;border-radius:10px;padding:11px 16px;margin-top:18px">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="width:7px;height:7px;border-radius:50%;background:${A};box-shadow:0 0 8px ${A}"></span>
-        <span style="font-size:10.5px;color:#30465F">${isEs ? 'Esta propuesta es válida hasta' : 'This proposal is valid until'}</span>
+        <span style="font-size:10.5px;color:#30465F">${esc(tt('pageClose.validityLabel'))}</span>
       </div>
       <span style="font-family:${FONTS.MONO};font-size:11px;font-weight:600;color:${N};letter-spacing:-0.005em">${esc(validUntil)}</span>
     </div>
 
     <!-- CTA -->
     <a href="${ctaHref}" style="display:flex;align-items:center;justify-content:center;gap:10px;background:${B};color:#fff;text-decoration:none;font-family:${FONTS.SANS};font-size:13px;font-weight:600;letter-spacing:-0.005em;padding:14px 22px;border-radius:9999px;margin-top:16px;box-shadow:0 12px 32px ${B}44">
-      <span>${isEs ? 'Aceptar propuesta' : 'Accept proposal'}</span>
+      <span>${esc(tt('pageClose.cta'))}</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
     </a>
 
     <!-- Signature placeholders -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px">
-      ${signatureCell(isEs ? 'Firma del cliente' : 'Client signature', st.clientName || '—')}
-      ${signatureCell('CreditCheck', isEs ? 'Equipo comercial' : 'Sales team')}
+      ${signatureCell(tt('pageClose.signatureClient'), st.clientName || '')}
+      ${signatureCell('CreditCheck', tt('pageClose.salesTeam'))}
     </div>
   </div>
 
@@ -113,10 +102,10 @@ function signatureCell(role, name) {
   </div>`;
 }
 
-function formatValidity(isEs) {
+function formatValidity(lang) {
   const d = new Date();
   d.setDate(d.getDate() + 30);
-  return new Intl.DateTimeFormat(isEs ? 'es' : 'en', {
+  return new Intl.DateTimeFormat(lang, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

@@ -297,6 +297,7 @@ textarea {
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
+  box-sizing: border-box;
 }
 input[type='text']:focus,
 textarea:focus {
@@ -304,8 +305,16 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(24, 88, 245, 0.08);
 }
 textarea {
-  resize: vertical;
+  /* Auto-fits the content height by default — no manual drag handle.
+     Hooked up via the useAutoGrowTextareas listener (App.jsx). */
+  resize: none;
+  overflow: hidden;
   line-height: 1.5;
+  min-height: 38px;
+}
+textarea[data-allow-resize='true'] {
+  resize: vertical;
+  overflow: auto;
 }
 
 /* Section titles — navy left accent bar */
@@ -464,9 +473,36 @@ textarea {
   flex-shrink: 0;
 }
 .feat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.feat-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t-mid);
+  padding: 6px 8px;
+  background: var(--bg-subtle);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 6px;
+}
+.feat-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--blue);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 1px 7px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 /* ── ADD / REMOVE BUTTONS ── */

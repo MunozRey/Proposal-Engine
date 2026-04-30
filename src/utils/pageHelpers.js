@@ -8,9 +8,13 @@ import { NAVY, BLUE, TC } from '../constants.js';
 import { esc } from './esc.js';
 import { ccLogoSvg, ccMarkSvg } from '../design/ccLogo.js';
 
-const SERIF = '"Larken", "IBM Plex Serif", Georgia, serif';
-const SANS = '"IBM Plex Sans", "Inter", "Segoe UI", system-ui, sans-serif';
-const MONO = '"IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace';
+// Use SINGLE quotes for font names so the resulting string can be embedded
+// inside a double-quoted inline style attribute without breaking the HTML parser.
+// (Previous double quotes caused style="...font-family:"IBM Plex Sans"..." to
+// terminate prematurely, dropping every CSS rule after font-family.)
+const SERIF = "'Larken', 'IBM Plex Serif', Georgia, serif";
+const SANS = "'IBM Plex Sans', 'Inter', 'Segoe UI', system-ui, sans-serif";
+const MONO = "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace";
 
 /**
  * Effective brand colors.
@@ -98,6 +102,20 @@ export function pillStr(text, { bg = '#005EFF', color = '#fff', dot } = {}) {
   }${esc(text)}</span>`;
 }
 
+/* ── Price pill (used in pricing tables: consistent across CPL/CPA/Hybrid) ── */
+// Always white-on-navy or white-on-blue so values stay readable and on-brand.
+// `tone`: 'blue' (default), 'navy', 'soft' (white card with navy text)
+export function pricePillStr(value, st, tone = 'blue') {
+  const { N, B } = getColors(st);
+  const palette = {
+    blue: { bg: B, color: '#FFFFFF', border: B },
+    navy: { bg: N, color: '#FFFFFF', border: N },
+    soft: { bg: '#FFFFFF', color: N, border: '#D5DDE7' },
+  };
+  const p = palette[tone] || palette.blue;
+  return `<span style="display:inline-block;background:${p.bg};color:${p.color};font-family:${MONO};font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid ${p.border};letter-spacing:0.01em;font-variant-numeric:tabular-nums">${esc(value)}</span>`;
+}
+
 /* ── Bullet (clean check-style) ─────────────────────────── */
 export function bulletItem(text, color, st) {
   const { B } = getColors(st);
@@ -152,7 +170,7 @@ export function featureBoxStr(title, features, st) {
 
 /* ── Calc card (mono numbers, clean layout) ─────────────── */
 export function calcBoxStr(title, text, st) {
-  const { N } = getColors(st);
+  const { N, A } = getColors(st);
   const lines = (text || '')
     .split('\n')
     .map((raw) => {
@@ -164,18 +182,21 @@ export function calcBoxStr(title, text, st) {
         line.match(/^(.*?)\s{2,}(.+)$/) || line.match(/^(.+?)\s+([+-]?[€$£¥0-9.,%]+\s*\w*)$/);
       const left = m ? m[1] : line;
       const right = m ? m[2] : '';
+      // Total line gets the brand yellow accent for the value, so the
+      // bottom-line number pops without breaking brand discipline.
+      const valueColor = isTotal ? A : '#FFFFFF';
       return `
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:3px 0;${isTotal ? `margin-top:6px;border-top:.5px solid rgba(255,255,255,.18);padding-top:7px` : ''};padding-left:${indent}px">
-        <span style="font-family:${SANS};font-size:9.5px;color:#FFFFFF;font-weight:${isTotal ? '700' : '600'}">${esc(left)}</span>
-        <span style="font-family:${MONO};font-size:${isTotal ? '12.5' : '10'}px;color:#FFFFFF;font-weight:${isTotal ? '800' : '700'};font-variant-numeric:tabular-nums">${esc(right)}</span>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:3px 0;${isTotal ? 'margin-top:8px;border-top:1px solid rgba(255,255,255,.22);padding-top:8px;' : ''}padding-left:${indent}px">
+        <span style="font-family:${SANS};font-size:9.5px;color:#FFFFFF;font-weight:${isTotal ? '700' : '600'};letter-spacing:-0.005em">${esc(left)}</span>
+        <span style="font-family:${MONO};font-size:${isTotal ? '13' : '10.5'}px;color:${valueColor};font-weight:${isTotal ? '800' : '700'};font-variant-numeric:tabular-nums">${esc(right)}</span>
       </div>`;
     })
     .join('');
   return `
   <div style="background:${N};border-radius:10px;padding:14px 16px;font-family:${SANS}">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:600;color:#fff;letter-spacing:-0.005em">${esc(title)}</div>
-      ${pillStr(st.language === 'es' ? 'Ejemplo' : 'Example', { bg: 'rgba(255,255,255,.12)', color: '#fff' })}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:10.5px;font-weight:700;color:#FFFFFF;letter-spacing:-0.005em">${esc(title)}</div>
+      ${pillStr(st.language === 'es' ? 'Ejemplo' : 'Example', { bg: 'rgba(255,204,0,.18)', color: A })}
     </div>
     ${lines}
   </div>`;
@@ -203,23 +224,23 @@ export function tableStr(headers, rows, st) {
   const ths = headers
     .map(
       (h) =>
-        `<th style="padding:10px 12px;font-family:${SANS};font-size:9px;font-weight:600;color:#fff;text-align:${h.align || 'left'};letter-spacing:0.04em;text-transform:uppercase;${h.width ? `width:${h.width}` : ''}">${esc(h.label)}</th>`
+        `<th style="padding:11px 12px;font-family:${SANS};font-size:10px;font-weight:700;color:#FFFFFF;text-align:${h.align || 'left'};letter-spacing:0.08em;text-transform:uppercase;${h.width ? `width:${h.width};` : ''}">${esc(h.label)}</th>`
     )
     .join('');
   const trs = rows
     .map((cells, ri) => {
-      const bg = ri % 2 === 0 ? '#fff' : '#FAFBFD';
+      const bg = ri % 2 === 0 ? '#FFFFFF' : '#F5F7FB';
       const tds = cells
         .map(
           (c) =>
-            `<td style="padding:8px 12px;font-family:${SANS};font-size:10px;color:${TC};${c.style || ''}">${c.html}</td>`
+            `<td style="padding:9px 12px;font-family:${SANS};font-size:10.5px;color:${TC};${c.style || ''}">${c.html}</td>`
         )
         .join('');
-      return `<tr style="background:${bg};border-bottom:.5px solid #F0F2F5">${tds}</tr>`;
+      return `<tr style="background:${bg};border-bottom:.5px solid #E6ECF3">${tds}</tr>`;
     })
     .join('');
   return `
-  <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;border:1px solid #E6ECF3">
+  <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;border:1px solid #D5DDE7">
     <thead><tr style="background:${N}">${ths}</tr></thead>
     <tbody>${trs}</tbody>
   </table>`;
