@@ -115,16 +115,6 @@ export function ClientTab({ st, dispatch, t }) {
           onChange={(e) => dispatch({ t: 'SET', k: 'date', v: e.target.value })}
         />
       </div>
-
-      <div className="field">
-        <div className="field-label">{t('clientTab.proposalNumber')}</div>
-        <input
-          type="text"
-          value={st.proposalNumber || ''}
-          placeholder="CC-2026-0001"
-          onChange={(e) => dispatch({ t: 'SET', k: 'proposalNumber', v: e.target.value })}
-        />
-      </div>
     </div>
   );
 }
