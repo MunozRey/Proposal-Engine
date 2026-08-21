@@ -17,13 +17,11 @@ and one of them is a correctness landmine rather than a vulnerability.
 
 ### Top 3 conditions
 
-1. **Resolve the release-candidate problem, and build every service from one commit.**
-   HEAD is `v1.4.2-rc1` — a pre-release. The newest *stable* tag is `v1.2.3`, five months old.
-   The mandated split strategy builds `web`/`space`/`admin` from source while mirroring
-   `backend`/`live`/`proxy` at a pinned tag. Taken literally that pairs a 1.4.2-rc1 frontend with
-   a 1.2.3 backend — a two-minor-version API skew, and a near-certain broken deployment. Either
-   pin all six to `v1.2.3`, or accept `v1.4.2-rc1` across all six. Not one of each. **This needs
-   your decision — see the question at the end.**
+1. **Pin every service to `v1.4.1`.** *(Investigated and resolved — see "The version trap" below.)*
+   Do not build from HEAD. Mirror `backend`/`live`/`proxy` from the published
+   `makeplane/plane-*:v1.4.1` images, and build `web`/`space`/`admin` from source at git tag
+   **`v1.4.1-rc2`**. This satisfies the split-image rule with an explicit version tag and keeps
+   all six services on one version.
 2. **Neutralise all four phone-home call sites before first boot**, then confirm egress is closed.
    Telemetry is on by default and fires at container start.
 3. **Patch Django 5.2.15 → 5.2.17** (4 known CVEs), patch the 3 HIGH JS advisories, and add a
@@ -35,7 +33,7 @@ and one of them is a correctness landmine rather than a vulnerability.
 
 | # | Finding | Severity | Evidence (file:line) | Mitigation |
 |---|---------|----------|----------------------|------------|
-| 1 | HEAD is a release candidate, not a stable release. Split-image strategy would pair a 1.4.2-rc1 frontend with a 1.2.3 backend | **High** | `git describe --tags HEAD` → `v1.4.2-rc1`; newest stable tag `v1.2.3` | Build all six services from a single commit. Decide rc1-everywhere or v1.2.3-everywhere |
+| 1 | Cloned HEAD is the tip of upstream's `preview` **development branch**, tagged `v1.4.2-rc1`. Building from it would ship a pre-release, and the naive split would pair it with a 1.2.3 backend | **High** | `git symbolic-ref origin/HEAD` → `origin/preview`; `git describe HEAD` → `v1.4.2-rc1`; newest stable git tag `v1.2.3` | **Resolved:** pin all six to `v1.4.1` — mirror the published `:v1.4.1` images, build frontends from git `v1.4.1-rc2` |
 | 2 | Telemetry enabled by default, pushed on a Celery beat interval to a third-party collector | **High** | `license/models/instance.py:35` (`default=True`); `celery.py:51`; `utils/otlp_endpoints.py:19` (`https://telemetry.plane.so`) | Default to `False`; drop the beat entry; point `OTLP_ENDPOINT` at a local sink; verify with egress deny |
 | 3 | Instance registration runs at every container start | **High** | `apps/api/bin/docker-entrypoint-api.sh:24` → `manage.py register_instance` | Remove the entrypoint line; it has no function on an internal-only deploy |
 | 4 | Outbound version check to GitHub on every start | Medium | `license/management/commands/register_instance.py:43` → `api.github.com/repos/makeplane/plane/releases/latest` | Remove. Also an upstream-name leak (Phase 3) |
@@ -104,3 +102,45 @@ Findings 2, 3 and 4 are the de-brand phase's telemetry checklist. Concretely:
 `bin/docker-entrypoint-api.sh:24`, `license/management/commands/register_instance.py:43`.
 All five must be dead before the first boot, and the deployment should be egress-denied so a
 missed call site fails loudly instead of silently phoning home.
+
+
+---
+
+## The version trap, and how it resolves
+
+The brief's split-image rule looked like it forced a bad trade. The git repo's newest *stable*
+tag is `v1.2.3` (March), while the clone's HEAD is `v1.4.2-rc1`. Mirroring "a pinned stable tag"
+for the backend while building frontends from source would have paired a 1.4.2-rc1 frontend
+against a 1.2.3 backend — 188 commits and two minor versions apart.
+
+Checking the registry instead of assuming resolved it. **All six services publish a stable
+`v1.4.1` image tag**, even though no `v1.4.1` git tag exists — upstream tags images on release
+but only `-rc` tags in git. So the pinning target is `v1.4.1`, and Rule 5 holds intact.
+
+For the three images built from source, the matching source point is **`v1.4.1-rc2`**, whose
+`package.json` reads `1.4.1`. Two checks confirm it is safe to pair with the `v1.4.1` runtime
+images:
+
+| Check | Result |
+|---|---|
+| Commits `v1.4.1-rc2..HEAD` | 2 |
+| Changes to serializers / URL routing / migrations in that range | **none** |
+| New DB migrations after `v1.4.1-rc2` | **none** |
+
+No API-contract or schema drift. Residual risk: `v1.4.1-rc2` is not provably the exact commit
+that produced the published `v1.4.1` images — upstream may have cut the release from an
+untagged commit (one exists, `ed61f992`, dated 2026-08-04, carrying version `1.4.1`). The
+mitigation is a Phase 5 smoke test of the frontend against the mirrored backend, which is
+already required.
+
+### Also confirmed for later phases
+
+- **Gitea Actions works on this instance.** No runner is registered at repo or org scope, but
+  sibling repos have real run histories (`lunarpad` 15, `keyside` 9), so a shared instance-level
+  runner is servicing the org. Phase 4 CI is viable. Instance-level runner listing needs
+  `read:admin`, which the minted token lacks, so this is inferred from run history rather than
+  read directly.
+- **`lunarrails/Switchyard` was created public.** Corrected to private via API — an internal-only
+  deployment must not have a world-readable source repo. Default branch `main`, currently empty.
+- **Docker image names must be lowercase.** The repo is `Switchyard`, but registry paths must be
+  `lunarrails/switchyard-*`. Registry rejects uppercase in repository names.
