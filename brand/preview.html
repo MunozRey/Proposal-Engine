@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Switchyard — Brand Board</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+*{box-sizing:border-box} body{margin:0;background:var(--sy-bg);color:var(--sy-text);
+  font-family:var(--sy-font-body);font-size:var(--sy-text-base)}
+.wrap{max-width:1120px;margin:0 auto;padding:40px 32px 64px}
+h1{font-family:var(--sy-font-display);font-size:var(--sy-text-3xl);margin:0 0 4px}
+h2{font-family:var(--sy-font-display);font-size:var(--sy-text-sm);text-transform:uppercase;
+  letter-spacing:.09em;color:var(--sy-text-muted);margin:40px 0 14px;font-weight:600}
+.sub{color:var(--sy-text-muted);margin:0 0 8px}
+.card{background:var(--sy-surface);border:1px solid var(--sy-border-subtle);
+  border-radius:var(--sy-radius-xl);padding:24px}
+.row{display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+.sw{display:flex;flex-direction:column;gap:6px}
+.chip{width:104px;height:56px;border-radius:var(--sy-radius-lg);border:1px solid var(--sy-border-subtle)}
+.lab{font-family:var(--sy-font-mono);font-size:11px;color:var(--sy-text-muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:14px}
+.btn{border:0;border-radius:var(--sy-radius-md);padding:10px 18px;font-family:var(--sy-font-body);
+  font-weight:600;font-size:var(--sy-text-sm);cursor:pointer}
+.btn-p{background:var(--sy-primary);color:var(--sy-on-primary)}
+.btn-a{background:var(--sy-accent);color:var(--sy-on-accent)}
+.btn-o{background:transparent;color:var(--sy-primary);border:1.5px solid var(--sy-border-default)}
+.pill{display:inline-block;padding:4px 12px;border-radius:var(--sy-radius-full);
+  font-size:var(--sy-text-xs);font-weight:600}
+.favrow{display:flex;gap:20px;align-items:flex-end}
+.favrow figure{margin:0;text-align:center} .favrow figcaption{font-family:var(--sy-font-mono);font-size:10px;color:var(--sy-text-muted);margin-top:6px}
+code{font-family:var(--sy-font-mono);font-size:13px;color:var(--sy-primary)}
+.spec{margin:0 0 10px}
+.mono-mark{width:150px;height:28px;background:var(--sy-primary);
+  -webkit-mask:url('./logo/wordmark-text-mono.svg') no-repeat center/contain;
+  mask:url('./logo/wordmark-text-mono.svg') no-repeat center/contain}
+</style></head><body><div class="wrap">
+
+<h1>Switchyard</h1><p class="sub">Brand board — generated assets, rendered in-browser</p>
+
+<h2>Wordmark lockup</h2>
+<div class="card row">
+  <img src="./logo/wordmark-light.svg" height="34" alt="light">
+  <span style="color:var(--sy-border-default)">|</span>
+  <div class="mono-mark" title="monochrome via CSS mask - recolourable"></div>
+</div>
+<p class="sub" style="font-size:13px;margin-top:8px">Monochrome variant shown via CSS <code>mask-image</code>
+ &mdash; <code>currentColor</code> cannot inherit into an <code>&lt;img&gt;</code>-loaded SVG, so inline the
+ SVG or mask it.</p>
+<div class="card row" style="background:#0B0F14;margin-top:12px">
+  <img src="./logo/wordmark-dark.svg" height="34" alt="dark">
+</div>
+
+<h2>Icon — scale test</h2>
+<div class="card favrow">
+  <figure><img src="./logo/icon-light.svg" width="72"><figcaption>svg 72</figcaption></figure>
+  <figure><img src="./logo/icon-tile.svg" width="72"><figcaption>tile 72</figcaption></figure>
+  <figure><img src="./favicon/icon-512.png" width="64"><figcaption>512→64</figcaption></figure>
+  <figure><img src="./favicon/icon-180.png" width="45"><figcaption>180→45</figcaption></figure>
+  <figure><img src="./favicon/icon-32.png" width="32"><figcaption>32 (1:1)</figcaption></figure>
+  <figure><img src="./favicon/icon-16.png" width="16"><figcaption>16 (1:1)</figcaption></figure>
+</div>
+
+<h2>Palette</h2>
+<div class="card">
+  <div class="grid" id="sw"></div>
+</div>
+
+<h2>Semantic roles</h2>
+<div class="card row">
+  <span class="pill" style="background:var(--sy-success);color:var(--sy-text-inverse)">Success</span>
+  <span class="pill" style="background:var(--sy-warning);color:var(--sy-text-inverse)">Warning</span>
+  <span class="pill" style="background:var(--sy-error);color:var(--sy-text-inverse)">Error</span>
+  <span class="pill" style="background:var(--sy-info);color:var(--sy-text-inverse)">Info</span>
+  <button class="btn btn-p">Primary action</button>
+  <button class="btn btn-a">Accent</button>
+  <button class="btn btn-o">Secondary</button>
+</div>
+
+<h2>Typography</h2>
+<div class="card">
+  <p class="spec" style="font-family:var(--sy-font-display);font-size:34px;font-weight:700;margin:0 0 2px">Space Grotesk — Display 700</p>
+  <p class="spec" style="font-family:var(--sy-font-body);font-size:19px">Inter — Body 400. Route work onto the right track.</p>
+  <p class="spec" style="font-family:var(--sy-font-body);font-size:19px;font-weight:600">Inter — Body 600. Sprint 14 closes Friday.</p>
+  <p class="spec" style="font-family:var(--sy-font-mono);font-size:15px">JetBrains Mono — SY_API_BASE_URL=https://switchyard.apps.moon.nzero.pro</p>
+</div>
+</div>
+<script>
+const ramps={primary:'--sy-primary-',accent:'--sy-accent-',secondary:'--sy-secondary-',neutral:'--sy-neutral-'};
+const steps={primary:[50,100,200,300,400,500,600,700,800,900],accent:[50,100,200,300,400,500,600,700,800,900],
+ secondary:[50,100,200,300,400,500,600,700,800,900],neutral:[0,50,100,200,300,400,500,600,700,800,900,950]};
+const el=document.getElementById('sw'); const cs=getComputedStyle(document.documentElement);
+for(const [n,p] of Object.entries(ramps)) for(const s of steps[n]){
+ const v=cs.getPropertyValue(p+s).trim(); if(!v) continue;
+ const d=document.createElement('div'); d.className='sw';
+ d.innerHTML=`<div class="chip" style="background:${v}"></div><span class="lab">${n}-${s}<br>${v}</span>`;
+ el.appendChild(d);
+}
+</script></body></html>

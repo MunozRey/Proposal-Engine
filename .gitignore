@@ -2,3 +2,7 @@ node_modules
 dist
 .vercel
 # CI trigger
+
+# python
+__pycache__/
+*.pyc
