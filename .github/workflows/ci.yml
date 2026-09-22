@@ -1,0 +1,57 @@
+# The repository's own checks, run where the repository actually lives.
+#
+# There was a workflow before this one, at `.gitea/workflows/build-and-push.yaml`,
+# and it had never run a single time: GitHub Actions only reads `.github/workflows/`,
+# so the repository reported zero workflows and every push and every pull request
+# merged ungated. That file is still there and is still correct — it builds the
+# image the app manifest pins — but it belongs to the Gitea side of the house and
+# cannot run here.
+#
+# This one does the half that was missing: the gate. It builds nothing and pushes
+# nothing, so it needs no secrets and no self-hosted runner.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege: this workflow only ever reads the tree.
+permissions:
+  contents: read
+
+# A new push to the same branch makes the run in flight pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Read from .nvmrc so the version lives in ONE place: a number
+          # duplicated here is a number that drifts from what contributors run.
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Four steps rather than one `npm run check`, so a red run names what
+      # broke in the checks list instead of making somebody open the log.
+      - name: Format
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
